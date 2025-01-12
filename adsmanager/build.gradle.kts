@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
@@ -38,4 +39,17 @@ dependencies {
 
     implementation(libs.play.services.ads)
     implementation(libs.error.prone.annotations)
+}
+
+project.afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("libraryProject") {
+                groupId = "com.sandun"
+                artifactId = "adsSystem"
+                version = "1.0.5"
+                artifact(tasks.named("bundleReleaseAar").get())
+            }
+        }
+    }
 }
