@@ -44,11 +44,11 @@ dependencies {
 project.afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("libraryProject") {
-                groupId = "com.shehan"
-                artifactId = "adsmanager"
-                version = "1.0.21"
-                artifact(tasks.named("bundleReleaseAar").get())
+            create<MavenPublication>("library") {
+                groupId = "com.github.shehan-077"
+                artifactId = "Admob-Ads-Manager"
+                version = "1.0.22"
+                artifact(tasks.getByName("bundleReleaseAar"))
             }
         }
     }
