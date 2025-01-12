@@ -45,6 +45,9 @@ project.afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("libraryProject") {
+                groupId = "com.shehan"
+                artifactId = "adsmanager"
+                version = "1.0.21"
                 artifact(tasks.named("bundleReleaseAar").get())
             }
         }
