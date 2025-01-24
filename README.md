@@ -32,8 +32,8 @@ dependencyResolutionManagement {
 * Add the following dependencies to your `build.gradle` file:
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:-SNAPSHOT'
-implementation "com.google.android.gms:play-services-ads:23.5.0"
+implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.3'
+implementation "com.google.android.gms:play-services-ads:23.6.0"
 ```
 
 * ### Step 3: Configure Permissions and App ID
@@ -120,9 +120,13 @@ manager.showAppOpenAds(new RequestHandler() {
 manager.showBannerAds(findViewById(R.id."LINEARLAYOUT_ID"));
 ```
 
-* #### Show Native Ads
+* #### Show Native Ads (Small Native Ads)
 ```java
 manager.showNativeAds(findViewById(R.id."LINEARLAYOUT_ID"));
+```
+* #### Show Native Ads Medium (Medium Native Ads)
+```java
+manager.showNativeAdsMedium(findViewById(R.id."LINEARLAYOUT_ID"));
 ```
 
 * ## Explanation

@@ -47,7 +47,7 @@ project.afterEvaluate {
             create<MavenPublication>("library") {
                 groupId = "com.github.shehan-077"
                 artifactId = "Admob-Ads-Manager"
-                version = "1.0.22"
+                version = "1.0.3"
                 artifact(tasks.getByName("bundleReleaseAar"))
             }
         }

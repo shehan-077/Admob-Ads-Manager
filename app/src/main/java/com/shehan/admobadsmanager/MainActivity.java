@@ -15,7 +15,7 @@ import com.shehan.adsmanager.Modals.AdMobIds;
 
 public class MainActivity extends AppCompatActivity {
 
-    CardView btnAppOpen, btnInt, btnReward, btnRewardInt, btnBanner, btnNative;
+    CardView btnAppOpen, btnInt, btnReward, btnRewardInt, btnBanner, btnNative, btnNativeMedium;
     private AdsManager manager;
 
     @Override
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         btnRewardInt = findViewById(R.id.main_btnRewardInt);
         btnBanner = findViewById(R.id.main_btnBanner);
         btnNative = findViewById(R.id.main_btnNative);
+        btnNativeMedium = findViewById(R.id.main_btnNativeMedium);
 
         AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
                 new AdMobIds(
@@ -111,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
 
         btnNative.setOnClickListener(v-> {
             manager.showNativeAds(findViewById(R.id.main_nativeContainer));
+        });
+
+        btnNativeMedium.setOnClickListener(v-> {
+            manager.showNativeAdsMedium(findViewById(R.id.main_nativeMediumContainer));
         });
     }
 }

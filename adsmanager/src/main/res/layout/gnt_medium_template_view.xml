@@ -6,8 +6,7 @@
       android:layout_height="350dp"
       android:layout_width="match_parent"
       android:id="@+id/native_ad_view"
-      android:background="@drawable/gnt_outline_shape"
-      >
+      android:background="@drawable/gnt_outline_shape">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
