@@ -32,7 +32,7 @@ dependencyResolutionManagement {
 * Add the following dependencies to your `build.gradle` file:
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.3'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.31'
 implementation "com.google.android.gms:play-services-ads:23.6.0"
 ```
 
