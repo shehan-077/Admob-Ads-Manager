@@ -33,6 +33,8 @@ import com.shehan.adsmanager.Class.AdsUnit;
 import com.shehan.adsmanager.Class.PreLoad;
 import com.shehan.adsmanager.Class.RequestHandler;
 
+import java.util.Objects;
+
 public class AdsManager {
 
     private static AdsManager adsManager;
@@ -269,16 +271,20 @@ public class AdsManager {
 
     public void showBannerAds(LinearLayout container) {
         if (isEnabled) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            AdView adView = new AdView(activity);
-            LinearLayout.LayoutParams layoutParams =
-                    new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            adView.setLayoutParams(layoutParams);
-            adView.setAdUnitId(initializer.getAdMobIds().getBannerId());
-            adView.setAdSize(AdSize.BANNER);
-            container.removeAllViews();
-            container.addView(adView);
-            adView.loadAd(adRequest);
+            try {
+                AdRequest adRequest = new AdRequest.Builder().build();
+                AdView adView = new AdView(activity);
+                LinearLayout.LayoutParams layoutParams =
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                adView.setLayoutParams(layoutParams);
+                adView.setAdUnitId(initializer.getAdMobIds().getBannerId());
+                adView.setAdSize(AdSize.BANNER);
+                container.removeAllViews();
+                container.addView(adView);
+                adView.loadAd(adRequest);
+            } catch (Exception e) {
+                System.out.println("Banner load error : " + Objects.requireNonNull(e.getMessage()));
+            }
         }
     }
 
@@ -306,7 +312,36 @@ public class AdsManager {
                         }).build();
                 loader.loadAd(adRequest);
             } catch (Exception e) {
-                System.out.println("Native ad show process failed.");
+                System.out.println("Native ad show process failed : " + Objects.requireNonNull(e.getMessage()));
+            }
+        }
+    }
+
+    public void showNativeAdsMedium(LinearLayout container) {
+        if (isEnabled) {
+            try{
+                AdRequest adRequest = new AdRequest.Builder().build();
+                LinearLayout linearLayout = (LinearLayout) container;
+                LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.medium_native_ad_layout, null, false);
+                linearLayout.removeAllViews();
+                linearLayout.addView(layout);
+                TemplateView templateView = layout.findViewById(R.id.my_template_medium);
+                AdLoader loader = new AdLoader.Builder(activity, initializer.getAdMobIds().getNativeId())
+                        .forNativeAd(nativeAd -> {
+                            NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
+                            templateView.setVisibility(View.VISIBLE);
+                            templateView.setStyles(style);
+                            templateView.setNativeAd(nativeAd);
+                        }).withAdListener(new AdListener() {
+                            @Override
+                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                templateView.setVisibility(View.GONE);
+                                System.out.println("Medium Native load failed : " + loadAdError.getMessage());
+                            }
+                        }).build();
+                loader.loadAd(adRequest);
+            } catch (Exception e) {
+                System.out.println("Medium Native ad show process failed :" + Objects.requireNonNull(e.getMessage()));
             }
         }
     }
