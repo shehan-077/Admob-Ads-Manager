@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
-        manager = AdsManager.getInstance(this, initializer, true);
+        manager = AdsManager.getInstance(this, initializer, false);
         manager.preLoad(AdsUnit.ALL);
 
         btnAppOpen.setOnClickListener(v-> {

@@ -39,7 +39,7 @@ public class AdsManager {
 
     private static AdsManager adsManager;
     public AdsManagerInitializer initializer;
-    private static boolean isEnabled;
+    private static Boolean isEnabled;
     public AppCompatActivity activity;
     private PreLoad preLoad;
 
@@ -53,7 +53,7 @@ public class AdsManager {
     }
 
     public static AdsManager getInstance(AppCompatActivity activity) {
-        init(activity, null, true);
+        init(activity, null, isEnabled);
         return adsManager;
     }
 
@@ -66,10 +66,6 @@ public class AdsManager {
         }
         adsManager.activity = activity;
         MobileAds.initialize(activity);
-        setEnabled(enabled);
-    }
-
-    private static void setEnabled(boolean enabled) {
         isEnabled = enabled;
     }
 
@@ -321,7 +317,7 @@ public class AdsManager {
         if (isEnabled) {
             try{
                 AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout linearLayout = (LinearLayout) container;
+                LinearLayout linearLayout =  container;
                 LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.medium_native_ad_layout, null, false);
                 linearLayout.removeAllViews();
                 linearLayout.addView(layout);

@@ -110,7 +110,7 @@ public class PreLoad {
                 mRewardInt = null;
             }
         } catch (Exception e) {
-            throw e;
+            System.out.println(e.getMessage());
         }
 
     }

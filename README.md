@@ -32,8 +32,8 @@ dependencyResolutionManagement {
 * Add the following dependencies to your `build.gradle` file:
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.31'
-implementation "com.google.android.gms:play-services-ads:23.6.0"
+implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.4'
+implementation "com.google.android.gms:play-services-ads:24.2.0"
 ```
 
 * ### Step 3: Configure Permissions and App ID
