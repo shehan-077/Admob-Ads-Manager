@@ -167,24 +167,5 @@
                 android:layout_margin="10dp"
                 android:textColor="@color/white"/>
         </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/main_btnNext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#1d1d1d"
-            android:layout_marginHorizontal="30dp"
-            app:cardCornerRadius="10dp"
-            android:layout_marginTop="5dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Next Activity"
-                android:textSize="15sp"
-                android:gravity="center"
-                android:layout_margin="10dp"
-                android:textColor="@color/white"/>
-        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </RelativeLayout>

@@ -9,7 +9,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -23,6 +22,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -30,25 +30,24 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
     implementation(libs.play.services.ads)
     implementation(libs.error.prone.annotations)
 }
 
-project.afterEvaluate {
+afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("library") {
-                groupId = "com.github.shehan-077"
-                artifactId = "Admob-Ads-Manager"
-                version = "1.0.4"
-                artifact(tasks.getByName("bundleReleaseAar"))
+            create<MavenPublication>("release") {
+                groupId = "com.github.shehan-077" // GitHub username
+                artifactId = "Admob-Ads-Manager"  // Library name
+                version = "1.0.5"
+
+                artifact(tasks.named("bundleReleaseAar").get())
             }
         }
     }

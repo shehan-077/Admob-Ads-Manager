@@ -288,10 +288,9 @@ public class AdsManager {
         if (isEnabled) {
             try {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout nativeContainer = (LinearLayout) container;
                 LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.small_native_ad_layout, null, false);
-                nativeContainer.removeAllViews();
-                nativeContainer.addView(layout);
+                container.removeAllViews();
+                container.addView(layout);
                 TemplateView nativeAdView = layout.findViewById(R.id.my_template);
                 AdLoader loader = new AdLoader.Builder(activity, initializer.getAdMobIds().getNativeId())
                         .forNativeAd(nativeAd -> {
@@ -317,10 +316,9 @@ public class AdsManager {
         if (isEnabled) {
             try{
                 AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout linearLayout =  container;
                 LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.medium_native_ad_layout, null, false);
-                linearLayout.removeAllViews();
-                linearLayout.addView(layout);
+                container.removeAllViews();
+                container.addView(layout);
                 TemplateView templateView = layout.findViewById(R.id.my_template_medium);
                 AdLoader loader = new AdLoader.Builder(activity, initializer.getAdMobIds().getNativeId())
                         .forNativeAd(nativeAd -> {
