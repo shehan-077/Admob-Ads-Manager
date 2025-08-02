@@ -1,23 +1,32 @@
 package com.shehan.adsmanager.Modals;
 
+
+import java.util.List;
+
 public class AdMobIds {
 
     private String appId;
-    private String interstitialId;
-    private String bannerId;
-    private String appOpenId;
-    private String rewardId;
-    private String nativeId;
-    private String rewardIntId;
+    private List<String> interstitialIds;
+    private List<String> bannerIds;
+    private List<String> appOpenIds;
+    private List<String> rewardIds;
+    private List<String> nativeIds;
+    private List<String> rewardIntIds;
 
-    public AdMobIds(String appId, String interstitialId, String bannerId, String appOpenId, String rewardId, String nativeId, String rewardIntId) {
+    public AdMobIds(String appId,
+                    List<String> interstitialIds,
+                    List<String> bannerIds,
+                    List<String> appOpenIds,
+                    List<String> rewardIds,
+                    List<String> nativeIds,
+                    List<String> rewardIntIds) {
         this.appId = appId;
-        this.interstitialId = interstitialId;
-        this.bannerId = bannerId;
-        this.appOpenId = appOpenId;
-        this.rewardId = rewardId;
-        this.nativeId = nativeId;
-        this.rewardIntId = rewardIntId;
+        this.interstitialIds = interstitialIds;
+        this.bannerIds = bannerIds;
+        this.appOpenIds = appOpenIds;
+        this.rewardIds = rewardIds;
+        this.nativeIds = nativeIds;
+        this.rewardIntIds = rewardIntIds;
     }
 
     public String getAppId() {
@@ -28,51 +37,80 @@ public class AdMobIds {
         this.appId = appId;
     }
 
-    public String getInterstitialId() {
-        return interstitialId;
+    public List<String> getInterstitialIds() {
+        return interstitialIds;
     }
 
-    public void setInterstitialId(String interstitialId) {
-        this.interstitialId = interstitialId;
+    public void setInterstitialIds(List<String> interstitialIds) {
+        this.interstitialIds = interstitialIds;
     }
 
-    public String getBannerId() {
-        return bannerId;
+    public List<String> getBannerIds() {
+        return bannerIds;
     }
 
-    public void setBannerId(String bannerId) {
-        this.bannerId = bannerId;
+    public void setBannerIds(List<String> bannerIds) {
+        this.bannerIds = bannerIds;
     }
 
-    public String getAppOpenId() {
-        return appOpenId;
+    public List<String> getAppOpenIds() {
+        return appOpenIds;
     }
 
-    public void setAppOpenId(String appOpenId) {
-        this.appOpenId = appOpenId;
+    public void setAppOpenIds(List<String> appOpenIds) {
+        this.appOpenIds = appOpenIds;
     }
 
-    public String getRewardId() {
-        return rewardId;
+    public List<String> getRewardIds() {
+        return rewardIds;
     }
 
-    public void setRewardId(String rewardId) {
-        this.rewardId = rewardId;
+    public void setRewardIds(List<String> rewardIds) {
+        this.rewardIds = rewardIds;
     }
 
-    public String getNativeId() {
-        return nativeId;
+    public List<String> getNativeIds() {
+        return nativeIds;
     }
 
-    public void setNativeId(String nativeId) {
-        this.nativeId = nativeId;
+    public void setNativeIds(List<String> nativeIds) {
+        this.nativeIds = nativeIds;
     }
 
-    public String getRewardIntId() {
-        return rewardIntId;
+    public List<String> getRewardIntIds() {
+        return rewardIntIds;
     }
 
-    public void setRewardIntId(String rewardIntId) {
-        this.rewardIntId = rewardIntId;
+    public void setRewardIntIds(List<String> rewardIntIds) {
+        this.rewardIntIds = rewardIntIds;
+    }
+
+    public String getInterstitialId(int index) {
+        return getByIndex(interstitialIds, index);
+    }
+
+    public String getBannerId(int index) {
+        return getByIndex(bannerIds, index);
+    }
+
+    public String getAppOpenId(int index) {
+        return getByIndex(appOpenIds, index);
+    }
+
+    public String getRewardId(int index) {
+        return getByIndex(rewardIds, index);
+    }
+
+    public String getNativeId(int index) {
+        return getByIndex(nativeIds, index);
+    }
+
+    public String getRewardIntId(int index) {
+        return getByIndex(rewardIntIds, index);
+    }
+
+    private String getByIndex(List<String> list, int index) {
+        if (list == null || list.isEmpty() || index < 0 || index >= list.size()) return null;
+        return list.get(index);
     }
 }

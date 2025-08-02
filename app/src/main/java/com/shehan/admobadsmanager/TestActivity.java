@@ -31,76 +31,76 @@ public class TestActivity extends AppCompatActivity {
         btnNative = findViewById(R.id.main_btnNative);
         btnNativeMedium = findViewById(R.id.main_btnNativeMedium);
 
-        btnAppOpen.setOnClickListener(v-> {
-            manager.showAppOpenAds(new RequestHandler() {
-                @Override
-                public void onSuccess() {
-                    manager.preLoad(AdsUnit.APP_OPEN);
-                    Toast.makeText(TestActivity.this, "App Open Showed.", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError() {
-                    Toast.makeText(TestActivity.this, "App Open show failed.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        btnInt.setOnClickListener(v-> {
-            manager.showInterstitialAds(new RequestHandler() {
-                @Override
-                public void onSuccess() {
-                    manager.preLoad(AdsUnit.INTERSTITIAL);
-                    Toast.makeText(TestActivity.this, "Interstitial ads showed.", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError() {
-                    Toast.makeText(TestActivity.this, "Interstitial ads show failed.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        btnReward.setOnClickListener(v-> {
-            manager.showRewardAds(new RequestHandler() {
-                @Override
-                public void onSuccess() {
-                    manager.preLoad(AdsUnit.REWARD);
-                    Toast.makeText(TestActivity.this, "Reward ads showed.", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError() {
-                    Toast.makeText(TestActivity.this, "Reward ads show failed.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        btnRewardInt.setOnClickListener(v-> {
-            manager.showRewardIntAds(new RequestHandler() {
-                @Override
-                public void onSuccess() {
-                    manager.preLoad(AdsUnit.REWARD_INT);
-                    Toast.makeText(TestActivity.this, "Reward Interstitial ads showed.", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError() {
-                    Toast.makeText(TestActivity.this, "Reward Interstitial ads show failed.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        btnBanner.setOnClickListener(v-> {
-            manager.showBannerAds(findViewById(R.id.main_bannerContainer));
-        });
-
-        btnNative.setOnClickListener(v-> {
-            manager.showNativeAds(findViewById(R.id.main_nativeContainer));
-        });
-
-        btnNativeMedium.setOnClickListener(v-> {
-            manager.showNativeAdsMedium(findViewById(R.id.main_nativeMediumContainer));
-        });
+//        btnAppOpen.setOnClickListener(v-> {
+//            manager.showAppOpenAds(new RequestHandler() {
+//                @Override
+//                public void onSuccess() {
+//                    manager.preLoad(AdsUnit.APP_OPEN);
+//                    Toast.makeText(TestActivity.this, "App Open Showed.", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onError() {
+//                    Toast.makeText(TestActivity.this, "App Open show failed.", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        });
+//
+//        btnInt.setOnClickListener(v-> {
+//            manager.showInterstitialAds(new RequestHandler() {
+//                @Override
+//                public void onSuccess() {
+//                    manager.preLoad(AdsUnit.INTERSTITIAL);
+//                    Toast.makeText(TestActivity.this, "Interstitial ads showed.", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onError() {
+//                    Toast.makeText(TestActivity.this, "Interstitial ads show failed.", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        });
+//
+//        btnReward.setOnClickListener(v-> {
+//            manager.showRewardAds(new RequestHandler() {
+//                @Override
+//                public void onSuccess() {
+//                    manager.preLoad(AdsUnit.REWARD);
+//                    Toast.makeText(TestActivity.this, "Reward ads showed.", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onError() {
+//                    Toast.makeText(TestActivity.this, "Reward ads show failed.", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        });
+//
+//        btnRewardInt.setOnClickListener(v-> {
+//            manager.showRewardIntAds(new RequestHandler() {
+//                @Override
+//                public void onSuccess() {
+//                    manager.preLoad(AdsUnit.REWARD_INT);
+//                    Toast.makeText(TestActivity.this, "Reward Interstitial ads showed.", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onError() {
+//                    Toast.makeText(TestActivity.this, "Reward Interstitial ads show failed.", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        });
+//
+//        btnBanner.setOnClickListener(v-> {
+//            manager.showBannerAds(findViewById(R.id.main_bannerContainer));
+//        });
+//
+//        btnNative.setOnClickListener(v-> {
+//            manager.showNativeAds(findViewById(R.id.main_nativeContainer));
+//        });
+//
+//        btnNativeMedium.setOnClickListener(v-> {
+//            manager.showNativeAdsMedium(findViewById(R.id.main_nativeMediumContainer));
+//        });
     }
 }

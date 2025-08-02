@@ -1,53 +1,61 @@
-* # AdsSystem Library
-* Easily integrate Google AdMob into your Android application with just a few lines of code.
+# Custom AdMob Ads Manager Library
 
-* ## Key Features
-* Pre-loading ads for a seamless user experience.
+Easily integrate Google AdMob into your Android application with just a few lines of code.
 
-* ## Supported Ad Types
-* - Interstitial Ads
-* - App Open Ads
-* - Reward Ads
-* - Reward Interstitial Ads
-* - Native Ads
-* - Banner Ads
+---
 
-* ## Getting Started
+## 🚀 Key Features
 
-* ### Step 1: Add JitPack Repository
-* Add the following to your `settings.gradle` file:
+* Pre-load ads for a seamless user experience
+* **NEW in v2.0.0:** Supports multiple AdMob ad unit IDs per ad type for better flexibility, A/B testing, and regional targeting
+
+---
+
+## 📺 Supported Ad Types
+
+* Interstitial Ads
+* App Open Ads
+* Rewarded Ads
+* Rewarded Interstitial Ads
+* Native Ads (Small & Medium)
+* Banner Ads
+
+---
+
+## 🧩 Getting Started
+
+### Step 1: Add JitPack Repository
+
+Add the following to your `settings.gradle`:
 
 ```gradle
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        maven { url = uri("https://www.jitpack.io") }
         mavenCentral()
+        maven { url = uri("https://www.jitpack.io") }
     }
 }
 ```
 
-* ### Step 2: Add Dependencies
-* Add the following dependencies to your `build.gradle` file:
+### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:1.0.4'
-implementation "com.google.android.gms:play-services-ads:24.2.0"
+implementation 'com.github.shehan-077:Admob-Ads-Manager:2.0.0'
+implementation 'com.google.android.gms:play-services-ads:24.5.0'
 ```
 
-* ### Step 3: Configure Permissions and App ID
+### Step 3: Configure Permissions & App ID
 
-* #### Add Permissions
-* Include these permissions in your `AndroidManifest.xml`:
+#### Permissions
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 ```
 
-* #### Set Your AdMob App ID
-* Add your AdMob app ID in the `AndroidManifest.xml`:
+#### App ID in Manifest
 
 ```xml
 <meta-data
@@ -55,92 +63,131 @@ implementation "com.google.android.gms:play-services-ads:24.2.0"
     android:value="YOUR_ADMOB_APP_ID" />
 ```
 
-* ### Step 4: Initialize AdMob
-* Initialize the AdsManager with your AdMob app IDs:
+---
+
+## 🔧 Initialize AdMob
+
+### With Multiple Ad Unit IDs
 
 ```java
 AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
-     new AdMobIds(
-         "ADMOB_APP_ID", 
-         "ADMOB_INTERSTITIAL_AD_ID", 
-         "ADMOB_BANNER_AD_ID", 
-         "ADMOB_APP_OPEN_AD_ID",
-         "ADMOB_REWARD_AD_ID", 
-         "ADMOB_NATIVE_AD_ID", 
-         "ADMOB_REWARD_INTERSTITIAL_AD_ID"
-     )
- );
+    new AdMobIds(
+        "ADMOB_APP_ID",
+        Arrays.asList("INTERSTITIAL_AD_1", "INTERSTITIAL_AD_2"),
+        Arrays.asList("BANNER_AD_1", "BANNER_AD_2"),
+        Arrays.asList("APP_OPEN_AD_1", "APP_OPEN_AD_2"),
+        Arrays.asList("REWARD_AD_1", "REWARD_AD_2"),
+        Arrays.asList("NATIVE_AD_1", "NATIVE_AD_2"),
+        Arrays.asList("REWARD_INTERSTITIAL_AD_1", "REWARD_INTERSTITIAL_AD_2")
+    )
+);
 ```
 
-* ### Step 5: Create AdsManager
-* Create an `AdsManager` instance to manage ads in your app:
+### With Single Ad Unit ID
+
+```java
+AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
+    new AdMobIds(
+        "ADMOB_APP_ID",
+        List.of("INTERSTITIAL_AD_ID"),
+        List.of("BANNER_AD_ID"),
+        List.of("APP_OPEN_AD_ID"),
+        List.of("REWARD_AD_ID"),
+        List.of("NATIVE_AD_ID"),
+        List.of("REWARD_INTERSTITIAL_AD_ID")
+    )
+);
+```
+
+---
+
+## 🧠 Create AdsManager
 
 ```java
 AdsManager manager = AdsManager.getInstance(this, initializer, true);
 ```
 
-* **`this`**: Pass your activity or context.
-* **`initializer`**: The `AdsManagerInitializer` instance created earlier.
-* **`true`**: Enables ads. Use `false` to disable all ads.
+* `this`: your `Activity` context
+* `initializer`: AdMob config instance
+* `true`: enable ads (`false` to disable)
 
-* ### Step 6: Pre-load Ads
-* Pre-load ads to ensure smooth display:
+---
+
+## ⚡ Pre-load Ads
 
 ```java
-// Preload all ads
-manager.preLoad(AdsUnit.ALL);
+// Pre-load Interstitial Ad at index 0
+manager.preLoad(AdsUnit.INTERSTITIAL, 0);
 
-// Preload only interstitial ads
-manager.preLoad(AdsUnit.INTERSTITIAL);
-
-// Preload specific ad units
-manager.preLoad(AdsUnit."AD_UNIT_NAME");
+// Pre-load any ad unit type
+manager.preLoad(AdsUnit.REWARD, 1); // index 1 for second ad unit
 ```
 
-* ### Step 7: Show Ads
+---
 
-* #### Show App Open Ads
+## ▶️ Show Ads
+
+### App Open Ad
+
 ```java
-manager.showAppOpenAds(new RequestHandler() {
+manager.showAppOpenAds(0, new RequestHandler() {
     @Override
     public void onSuccess() {
-        manager.preLoad(AdsUnit.APP_OPEN); // Preload after showing
-        // Handle success logic
+        manager.preLoad(AdsUnit.APP_OPEN, 0);
     }
-
     @Override
     public void onError() {
-        // Handle error logic
+        // handle error
     }
 });
 ```
 
-* #### Show Banner Ads
+### Banner Ad
+
 ```java
-manager.showBannerAds(findViewById(R.id."LINEARLAYOUT_ID"));
+manager.showBannerAds(0, findViewById(R.id.banner_container));
 ```
 
-* #### Show Native Ads (Small Native Ads)
+### Native Ad (Small)
+
 ```java
-manager.showNativeAds(findViewById(R.id."LINEARLAYOUT_ID"));
-```
-* #### Show Native Ads Medium (Medium Native Ads)
-```java
-manager.showNativeAdsMedium(findViewById(R.id."LINEARLAYOUT_ID"));
+manager.showNativeAds(0, findViewById(R.id.native_ad_container));
 ```
 
-* ## Explanation
-* **`AdsManagerInitializer`**: Initializes the AdMob app and ad unit IDs.
-* **`AdsManager`**: Manages ads, including pre-loading, showing, and handling requests.
-* **`true/false` in AdsManager**:
-*   `true`: Enables ads.
-*   `false`: Disables ads for specific use cases.
+### Native Ad (Medium)
 
-* ## Usage Tips
-* Always pre-load ads to minimize latency.
-* Implement error handling in all ad-related callbacks to ensure a smooth user experience.
-* Ensure ad placement complies with AdMob policies to avoid account suspension.
+```java
+manager.showNativeAdsMedium(0, findViewById(R.id.medium_native_container));
+```
 
-* ## Enjoy! 🎉
-* Feel free to use this library to simplify ad integration in your Android apps.
-* If you encounter any issues or have feature requests, please open an issue or contribute to the repository.
+---
+
+## 🧾 Explanation
+
+* **`AdsManagerInitializer`**: Holds your app and ad unit IDs
+* **`AdsManager`**: Core class to preload, show, and manage ads
+* **`true/false` flag**: Enable or disable ads globally
+
+---
+
+## 💡 Usage Tips
+
+* Always preload ads to reduce display delay
+* Handle all ad events for reliability
+* Use index-based loading for region-based or fallback logic
+* Follow AdMob policy strictly to avoid account issues
+
+---
+
+## 🆕 What's New in 2.0.0
+
+* ✅ **Multiple Ad Unit ID Support** – Add and select multiple ad unit IDs per ad type
+* 🧹 **Simplified Preload** – Removed separate preload methods for each unit
+
+---
+
+## 🎉 Enjoy!
+
+Feel free to use this library to simplify and streamline AdMob integration.
+
+If you find a bug or want to contribute, please open an issue or pull request on GitHub.

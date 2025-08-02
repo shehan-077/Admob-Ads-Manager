@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.shehan.adsmanager"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -43,9 +43,9 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("release") {
-                groupId = "com.github.shehan-077" // GitHub username
-                artifactId = "Admob-Ads-Manager"  // Library name
-                version = "1.0.5"
+                groupId = "com.github.shehan-077"
+                artifactId = "Admob-Ads-Manager"
+                version = "2.0.0"
 
                 artifact(tasks.named("bundleReleaseAar").get())
             }
