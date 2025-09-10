@@ -7,7 +7,7 @@ Easily integrate Google AdMob into your Android application with just a few line
 ## 🚀 Key Features
 
 * Pre-load ads for a seamless user experience
-* **NEW in v2.0.0:** Supports multiple AdMob ad unit IDs per ad type for better flexibility, A/B testing, and regional targeting
+* **NEW in v2.0.1:** Use `Context` instead of `AppCompatActivity`
 
 ---
 
@@ -42,7 +42,7 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:2.0.0'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:2.0.1'
 implementation 'com.google.android.gms:play-services-ads:24.5.0'
 ```
 
@@ -107,7 +107,7 @@ AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
 AdsManager manager = AdsManager.getInstance(this, initializer, true);
 ```
 
-* `this`: your `Activity` context
+* `this`: your `Context`
 * `initializer`: AdMob config instance
 * `true`: enable ads (`false` to disable)
 
@@ -179,15 +179,14 @@ manager.showNativeAdsMedium(0, findViewById(R.id.medium_native_container));
 
 ---
 
-## 🆕 What's New in 2.0.0
+## 🆕 What's New in 2.0.1
 
-* ✅ **Multiple Ad Unit ID Support** – Add and select multiple ad unit IDs per ad type
-* 🧹 **Simplified Preload** – Removed separate preload methods for each unit
+* ✅ **Kotlin Friendly** – Use Context instead of AppCompatActivity (V 2.0.1)
+* ✅ **Multiple Ad Unit ID Support** – Add and select multiple ad unit IDs per ad type (V 2.0.0)
+* 🧹 **Simplified Preload** – Removed separate preload methods for each unit (V 2.0.0)
 
 ---
 
 ## 🎉 Enjoy!
 
 Feel free to use this library to simplify and streamline AdMob integration.
-
-If you find a bug or want to contribute, please open an issue or pull request on GitHub.

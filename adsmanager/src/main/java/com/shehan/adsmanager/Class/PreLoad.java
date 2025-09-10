@@ -29,7 +29,7 @@ public class PreLoad {
 
     public void Load_Int_Ads(int index) {
         AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(adsManager.activity, adsManager.initializer.getAdMobIds().getInterstitialId(index),
+        InterstitialAd.load(adsManager.context, adsManager.initializer.getAdMobIds().getInterstitialId(index),
                 adRequest, new InterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -46,7 +46,7 @@ public class PreLoad {
 
     public void Load_App_Open(int index) {
         AdRequest adRequest = new AdRequest.Builder().build();
-        AppOpenAd.load(adsManager.activity, adsManager.initializer.getAdMobIds().getAppOpenId(index),
+        AppOpenAd.load(adsManager.context, adsManager.initializer.getAdMobIds().getAppOpenId(index),
                 adRequest, new AppOpenAd.AppOpenAdLoadCallback() {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -63,7 +63,7 @@ public class PreLoad {
 
     public void Load_Reward_Ads(int index) {
         AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedAd.load(adsManager.activity, adsManager.initializer.getAdMobIds().getRewardId(index),
+        RewardedAd.load(adsManager.context, adsManager.initializer.getAdMobIds().getRewardId(index),
                 adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -80,7 +80,7 @@ public class PreLoad {
 
     public void Load_Reward_Int(int index) {
         AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedInterstitialAd.load(adsManager.activity, adsManager.initializer.getAdMobIds().getRewardIntId(index),
+        RewardedInterstitialAd.load(adsManager.context, adsManager.initializer.getAdMobIds().getRewardIntId(index),
                 adRequest, new RewardedInterstitialAdLoadCallback() {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {

@@ -1,5 +1,7 @@
 package com.shehan.adsmanager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,33 +42,29 @@ public class AdsManager {
     private static AdsManager adsManager;
     public AdsManagerInitializer initializer;
     private static Boolean isEnabled;
-    public AppCompatActivity activity;
-    private PreLoad preLoad;
+    public Context context;
+    private final PreLoad preLoad;
 
     private AdsManager() {
         preLoad = new PreLoad(this);
     }
 
-    public static AdsManager getInstance(AppCompatActivity activity, AdsManagerInitializer initializer, boolean enabled) {
-        init(activity, initializer, enabled);
+    public static AdsManager getInstance(Context context, AdsManagerInitializer initializer, boolean adsEnabled) {
+        init(context, initializer, adsEnabled);
         return  adsManager;
     }
 
-    public static AdsManager getInstance(AppCompatActivity activity) {
-        init(activity, null, isEnabled);
+    public static AdsManager getInstance(Context context) {
+        init(context, null, isEnabled);
         return adsManager;
     }
 
-    private static void init(AppCompatActivity activity, AdsManagerInitializer initializer, boolean enabled) {
-        if (adsManager == null) {
-            adsManager = new AdsManager();
-        }
-        if (initializer != null) {
-            adsManager.initializer = initializer;
-        }
-        adsManager.activity = activity;
-        MobileAds.initialize(activity);
+    private static void init(Context context, AdsManagerInitializer initializer, boolean enabled) {
+        if (adsManager == null) adsManager = new AdsManager();
+        adsManager.context = context;
+        MobileAds.initialize(context);
         isEnabled = enabled;
+        if (initializer != null) adsManager.initializer = initializer;
     }
 
     public void preLoad(AdsUnit adsUnit, int index) {
@@ -95,7 +93,7 @@ public class AdsManager {
     public void showInterstitialAds(int index, RequestHandler handler) {
         if (isEnabled) {
             if (preLoad.mInterstitial != null) {
-                preLoad.mInterstitial.show(activity);
+                preLoad.mInterstitial.show((Activity) context);
                 preLoad.mInterstitial.setFullScreenContentCallback(new FullScreenContentCallback() {
                     @Override
                     public void onAdDismissedFullScreenContent() {
@@ -110,7 +108,7 @@ public class AdsManager {
                 });
             } else {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                InterstitialAd.load(activity, initializer.getAdMobIds().getInterstitialId(index), adRequest,
+                InterstitialAd.load(context, initializer.getAdMobIds().getInterstitialId(index), adRequest,
                         new InterstitialAdLoadCallback() {
                             @Override
                             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -119,7 +117,7 @@ public class AdsManager {
 
                             @Override
                             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                                interstitialAd.show(activity);
+                                interstitialAd.show((Activity) context);
                                 interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                     @Override
                                     public void onAdDismissedFullScreenContent() {
@@ -143,7 +141,7 @@ public class AdsManager {
     public void showRewardAds(int index, RequestHandler handler) {
         if (isEnabled) {
             if (preLoad.mReward != null) {
-                preLoad.mReward.show(activity, new OnUserEarnedRewardListener() {
+                preLoad.mReward.show((Activity) context, new OnUserEarnedRewardListener() {
                     @Override
                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                         preLoad.Load_Reward_Ads(index);
@@ -152,7 +150,7 @@ public class AdsManager {
                 });
             } else {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                RewardedAd.load(activity, initializer.getAdMobIds().getRewardId(index), adRequest,
+                RewardedAd.load(context, initializer.getAdMobIds().getRewardId(index), adRequest,
                         new RewardedAdLoadCallback() {
                             @Override
                             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -161,7 +159,7 @@ public class AdsManager {
 
                             @Override
                             public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-                                rewardedAd.show(activity, new OnUserEarnedRewardListener() {
+                                rewardedAd.show((Activity) context, new OnUserEarnedRewardListener() {
                                     @Override
                                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                                         handler.onSuccess();
@@ -179,7 +177,7 @@ public class AdsManager {
     public void showRewardIntAds(int index, RequestHandler handler) {
         if (isEnabled) {
             if (preLoad.mRewardInt != null) {
-                preLoad.mRewardInt.show(activity, new OnUserEarnedRewardListener() {
+                preLoad.mRewardInt.show((Activity) context, new OnUserEarnedRewardListener() {
                     @Override
                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                         preLoad.Load_Reward_Int(index);
@@ -188,7 +186,7 @@ public class AdsManager {
                 });
             } else {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                RewardedInterstitialAd.load(activity, initializer.getAdMobIds().getRewardIntId(index), adRequest,
+                RewardedInterstitialAd.load(context, initializer.getAdMobIds().getRewardIntId(index), adRequest,
                         new RewardedInterstitialAdLoadCallback() {
                             @Override
                             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -197,7 +195,7 @@ public class AdsManager {
 
                             @Override
                             public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
-                                rewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
+                                rewardedInterstitialAd.show((Activity) context, new OnUserEarnedRewardListener() {
                                     @Override
                                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                                         handler.onSuccess();
@@ -215,7 +213,7 @@ public class AdsManager {
     public void showAppOpenAds(int index, RequestHandler handler) {
         if (isEnabled) {
             if (preLoad.mAppOpen != null) {
-                preLoad.mAppOpen.show(activity);
+                preLoad.mAppOpen.show((Activity) context);
                 preLoad.mAppOpen.setFullScreenContentCallback(new FullScreenContentCallback() {
                     @Override
                     public void onAdDismissedFullScreenContent() {
@@ -230,7 +228,7 @@ public class AdsManager {
                 });
             } else {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                AppOpenAd.load(activity, initializer.getAdMobIds().getAppOpenId(index), adRequest,
+                AppOpenAd.load(context, initializer.getAdMobIds().getAppOpenId(index), adRequest,
                         new AppOpenAd.AppOpenAdLoadCallback() {
                             @Override
                             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -239,7 +237,7 @@ public class AdsManager {
 
                             @Override
                             public void onAdLoaded(@NonNull AppOpenAd appOpenAd) {
-                                appOpenAd.show(activity);
+                                appOpenAd.show((Activity) context);
                                 appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                     @Override
                                     public void onAdDismissedFullScreenContent() {
@@ -263,7 +261,7 @@ public class AdsManager {
         if (isEnabled) {
             try {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                AdView adView = new AdView(activity);
+                AdView adView = new AdView(context);
                 LinearLayout.LayoutParams layoutParams =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 adView.setLayoutParams(layoutParams);
@@ -282,11 +280,11 @@ public class AdsManager {
         if (isEnabled) {
             try {
                 AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.small_native_ad_layout, null, false);
+                LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.small_native_ad_layout, null, false);
                 container.removeAllViews();
                 container.addView(layout);
                 TemplateView nativeAdView = layout.findViewById(R.id.my_template);
-                AdLoader loader = new AdLoader.Builder(activity, initializer.getAdMobIds().getNativeId(index))
+                AdLoader loader = new AdLoader.Builder(context, initializer.getAdMobIds().getNativeId(index))
                         .forNativeAd(nativeAd -> {
                             NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
                             nativeAdView.setVisibility(View.VISIBLE);
@@ -310,11 +308,11 @@ public class AdsManager {
         if (isEnabled) {
             try{
                 AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout layout = (LinearLayout) LayoutInflater.from(activity).inflate(R.layout.medium_native_ad_layout, null, false);
+                LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.medium_native_ad_layout, null, false);
                 container.removeAllViews();
                 container.addView(layout);
                 TemplateView templateView = layout.findViewById(R.id.my_template_medium);
-                AdLoader loader = new AdLoader.Builder(activity, initializer.getAdMobIds().getNativeId(index))
+                AdLoader loader = new AdLoader.Builder(context, initializer.getAdMobIds().getNativeId(index))
                         .forNativeAd(nativeAd -> {
                             NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
                             templateView.setVisibility(View.VISIBLE);
