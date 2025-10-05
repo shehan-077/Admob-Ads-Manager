@@ -1,6 +1,6 @@
-package com.shehan.adsmanager.Class;
+package com.shehan.adsmanager.classes;
 
-import com.shehan.adsmanager.Modals.AdMobIds;
+import com.shehan.adsmanager.modules.AdMobIds;
 
 public class AdsManagerInitializer {
 

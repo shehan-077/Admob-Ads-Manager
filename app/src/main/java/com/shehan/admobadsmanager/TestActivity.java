@@ -1,15 +1,12 @@
 package com.shehan.admobadsmanager;
 
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.shehan.adsmanager.AdsManager;
-import com.shehan.adsmanager.Class.AdsUnit;
-import com.shehan.adsmanager.Class.RequestHandler;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -20,8 +17,6 @@ public class TestActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-
-        manager = AdsManager.getInstance(this);
 
         btnAppOpen = findViewById(R.id.main_btnAppOpen);
         btnInt = findViewById(R.id.main_btnInt);

@@ -1,14 +1,17 @@
 package com.shehan.adsmanager;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
@@ -19,316 +22,355 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
-import com.shehan.adsmanager.Ads.NativeTemplateStyle;
-import com.shehan.adsmanager.Ads.TemplateView;
-import com.shehan.adsmanager.Class.AdsManagerInitializer;
-import com.shehan.adsmanager.Class.AdsUnit;
-import com.shehan.adsmanager.Class.PreLoad;
-import com.shehan.adsmanager.Class.RequestHandler;
+import com.shehan.adsmanager.ads.NativeTemplateStyle;
+import com.shehan.adsmanager.ads.TemplateView;
+import com.shehan.adsmanager.classes.AdUnitResolver;
+import com.shehan.adsmanager.classes.AdsManagerInitializer;
+import com.shehan.adsmanager.classes.AdsUnit;
+import com.shehan.adsmanager.classes.PreLoad;
+import com.shehan.adsmanager.callback.RequestHandler;
+import com.shehan.adsmanager.enums.AdsStatus;
+import com.shehan.adsmanager.enums.NativeAdsSize;
+import com.shehan.adsmanager.loadingview.LoadingOverlay;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AdsManager {
 
-    private static AdsManager adsManager;
+    private static volatile AdsManager adsManager;
+    private static final AtomicBoolean mobileAdsInitialized = new AtomicBoolean(false);
+    private final Application application;
     public AdsManagerInitializer initializer;
-    private static Boolean isEnabled;
-    public Context context;
+    private AdsStatus adsStatus = AdsStatus.ENABLED;
+    private AdUnitResolver adUnitResolver;
     private final PreLoad preLoad;
+    private final LoadingOverlay loading = new LoadingOverlay();
+    @Nullable private Integer loaderTintColor = null;
 
-    private AdsManager() {
+    private AdsManager(@NonNull Application app) {
+        this.application = app;
         preLoad = new PreLoad(this);
     }
 
-    public static AdsManager getInstance(Context context, AdsManagerInitializer initializer, boolean adsEnabled) {
-        init(context, initializer, adsEnabled);
-        return  adsManager;
-    }
+    public static AdsManager init (@NonNull Context context, @NonNull AdsManagerInitializer initializer, @NonNull AdsStatus status) {
+        if (adsManager == null) {
+            synchronized (AdsManager.class) {
+                if (adsManager == null) {
+                    Application app = (Application) context.getApplicationContext();
+                    adsManager = new AdsManager(app);
+                }
+            }
+        }
+        adsManager.initializer = Objects.requireNonNull(initializer, "Initializer cannot be null.");
+        adsManager.adsStatus = Objects.requireNonNull(status, "Status cannot be null.");
+        adsManager.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
 
-    public static AdsManager getInstance(Context context) {
-        init(context, null, isEnabled);
+        if (mobileAdsInitialized.compareAndSet(false, true)) {
+            MobileAds.initialize(adsManager.application);
+        }
         return adsManager;
     }
 
-    private static void init(Context context, AdsManagerInitializer initializer, boolean enabled) {
-        if (adsManager == null) adsManager = new AdsManager();
-        adsManager.context = context;
-        MobileAds.initialize(context);
-        isEnabled = enabled;
-        if (initializer != null) adsManager.initializer = initializer;
+    public static AdsManager getInstance() {
+        AdsManager manager = adsManager;
+        if (manager == null) {
+            throw new IllegalStateException("AdsManager not initialized. Call getInstance(context, initializer, status) first.");
+        }
+        return manager;
+    }
+
+    public void setAdsStatus(@NonNull AdsStatus status) {
+        this.adsStatus = status;
+        if (initializer != null) {
+            this.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
+        }
     }
 
     public void preLoad(AdsUnit adsUnit, int index) {
-        if (isEnabled) {
-            switch (adsUnit) {
-                case INTERSTITIAL:
-                    preLoad.Load_Int_Ads(index);
-                    break;
-                case REWARD:
-                    preLoad.Load_Reward_Ads(index);
-                    break;
-                case APP_OPEN:
-                    preLoad.Load_App_Open(index);
-                    break;
-                case REWARD_INT:
-                    preLoad.Load_Reward_Int(index);
-                    break;
-            }
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        switch (adsUnit) {
+            case INTERSTITIAL:
+                preLoad.Load_Int_Ads(index);
+                break;
+            case REWARD:
+                preLoad.Load_Reward_Ads(index);
+                break;
+            case APP_OPEN:
+                preLoad.Load_App_Open(index);
+                break;
+            case REWARD_INT:
+                preLoad.Load_Reward_Int(index);
+                break;
         }
     }
+
+    public Application application() {return application;}
+
+    public AdUnitResolver resolver() {return adUnitResolver;}
+
+    public void setLoadingColor(@ColorInt int color) {this.loaderTintColor = color;}
 
     public void destroyAds() {
         preLoad.destroyAds();
     }
 
-    public void showInterstitialAds(int index, RequestHandler handler) {
-        if (isEnabled) {
-            if (preLoad.mInterstitial != null) {
-                preLoad.mInterstitial.show((Activity) context);
-                preLoad.mInterstitial.setFullScreenContentCallback(new FullScreenContentCallback() {
+    public void showInterstitialAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
+
+        loading.show(activity, loaderTintColor);
+
+        if (preLoad.mInterstitial != null) {
+            InterstitialAd ad = preLoad.mInterstitial;
+            preLoad.mInterstitial = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loading.dismiss();
+                    preLoad.Load_Int_Ads(index);
+                    handler.onSuccess();
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    loading.dismiss();
+                    preLoad.Load_Int_Ads(index);
+                    handler.onError(adError.getMessage());
+                }
+            });
+            ad.show(activity);
+            return;
+        }
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(application, resolver().interstitialId(index), adRequest,
+                new InterstitialAdLoadCallback() {
                     @Override
-                    public void onAdDismissedFullScreenContent() {
-                        preLoad.Load_Int_Ads(index);
-                        handler.onSuccess();
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        loading.dismiss();
+                        handler.onError(loadAdError.getMessage());
                     }
 
                     @Override
-                    public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                        handler.onError();
-                    }
-                });
-            } else {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                InterstitialAd.load(context, initializer.getAdMobIds().getInterstitialId(index), adRequest,
-                        new InterstitialAdLoadCallback() {
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                handler.onError();
+                            public void onAdDismissedFullScreenContent() {
+                                loading.dismiss();
+                                preLoad.Load_Int_Ads(index);
+                                handler.onSuccess();
                             }
 
                             @Override
-                            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                                interstitialAd.show((Activity) context);
-                                interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        preLoad.Load_Int_Ads(index);
-                                        handler.onSuccess();
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                        handler.onError();
-                                    }
-                                });
+                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                loading.dismiss();
+                                preLoad.Load_Int_Ads(index);
+                                handler.onError(adError.getMessage());
                             }
                         });
-            }
-        } else {
-            handler.onSuccess();
-        }
-    }
-
-    public void showRewardAds(int index, RequestHandler handler) {
-        if (isEnabled) {
-            if (preLoad.mReward != null) {
-                preLoad.mReward.show((Activity) context, new OnUserEarnedRewardListener() {
-                    @Override
-                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                        preLoad.Load_Reward_Ads(index);
-                        handler.onSuccess();
+                        interstitialAd.show(activity);
                     }
                 });
-            } else {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                RewardedAd.load(context, initializer.getAdMobIds().getRewardId(index), adRequest,
-                        new RewardedAdLoadCallback() {
-                            @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                handler.onError();
-                            }
-
-                            @Override
-                            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-                                rewardedAd.show((Activity) context, new OnUserEarnedRewardListener() {
-                                    @Override
-                                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                                        handler.onSuccess();
-                                        preLoad.Load_Reward_Ads(index);
-                                    }
-                                });
-                            }
-                        });
-            }
-        } else {
-            handler.onSuccess();
-        }
     }
 
-    public void showRewardIntAds(int index, RequestHandler handler) {
-        if (isEnabled) {
-            if (preLoad.mRewardInt != null) {
-                preLoad.mRewardInt.show((Activity) context, new OnUserEarnedRewardListener() {
+    public void showRewardAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
+
+        loading.show(activity, loaderTintColor);
+
+        if (preLoad.mReward != null) {
+            RewardedAd ad = preLoad.mReward;
+            preLoad.mReward = null;
+            ad.show(activity, rewardItem -> {
+                loading.dismiss();
+                preLoad.Load_Reward_Ads(index);
+                handler.onSuccess();
+            });
+            return;
+        }
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        RewardedAd.load(application, adUnitResolver.rewardedId(index), adRequest,
+                new RewardedAdLoadCallback() {
                     @Override
-                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                        preLoad.Load_Reward_Int(index);
-                        handler.onSuccess();
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        loading.dismiss();
+                        handler.onError(loadAdError.getMessage());
+                    }
+
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        rewardedAd.show(activity, rewardItem -> {
+                            loading.dismiss();
+                            preLoad.Load_Reward_Ads(index);
+                            handler.onSuccess();
+                        });
                     }
                 });
-            } else {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                RewardedInterstitialAd.load(context, initializer.getAdMobIds().getRewardIntId(index), adRequest,
-                        new RewardedInterstitialAdLoadCallback() {
-                            @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                handler.onError();
-                            }
-
-                            @Override
-                            public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
-                                rewardedInterstitialAd.show((Activity) context, new OnUserEarnedRewardListener() {
-                                    @Override
-                                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                                        handler.onSuccess();
-                                        preLoad.Load_Reward_Int(index);
-                                    }
-                                });
-                            }
-                        });
-            }
-        } else {
-            handler.onSuccess();
-        }
     }
 
-    public void showAppOpenAds(int index, RequestHandler handler) {
-        if (isEnabled) {
-            if (preLoad.mAppOpen != null) {
-                preLoad.mAppOpen.show((Activity) context);
-                preLoad.mAppOpen.setFullScreenContentCallback(new FullScreenContentCallback() {
+    public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
+        loading.show(activity, loaderTintColor);
+
+        if (preLoad.mRewardInt != null) {
+            RewardedInterstitialAd ad = preLoad.mRewardInt;
+            preLoad.mRewardInt = null;
+            ad.show(activity, rewardItem -> {
+                loading.dismiss();
+                preLoad.Load_Reward_Int(index);
+                handler.onSuccess();
+            });
+            return;
+        }
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        RewardedInterstitialAd.load(application, adUnitResolver.rewardedInterId(index), adRequest,
+                new RewardedInterstitialAdLoadCallback() {
                     @Override
-                    public void onAdDismissedFullScreenContent() {
-                        preLoad.destroyAds();
-                        handler.onSuccess();
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        loading.dismiss();
+                        handler.onError(loadAdError.getMessage());
                     }
 
                     @Override
-                    public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                        handler.onError();
+                    public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
+                        rewardedInterstitialAd.show(activity, rewardItem -> {
+                            loading.dismiss();
+                            preLoad.Load_Reward_Int(index);
+                            handler.onSuccess();
+                        });
                     }
                 });
-            } else {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                AppOpenAd.load(context, initializer.getAdMobIds().getAppOpenId(index), adRequest,
-                        new AppOpenAd.AppOpenAdLoadCallback() {
+    }
+
+    public void showAppOpenAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
+        loading.show(activity, loaderTintColor);
+
+        if (preLoad.mAppOpen != null) {
+            AppOpenAd ad = preLoad.mAppOpen;
+            preLoad.mAppOpen = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loading.dismiss();
+                    preLoad.Load_App_Open(index);
+                    handler.onSuccess();
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    loading.dismiss();
+                    preLoad.Load_App_Open(index);
+                    handler.onError(adError.getMessage());
+                }
+            });
+            ad.show(activity);
+            return;
+        }
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        AppOpenAd.load(application, adUnitResolver.appOpenId(index), adRequest,
+                new AppOpenAd.AppOpenAdLoadCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        loading.dismiss();
+                        handler.onError(loadAdError.getMessage());
+                    }
+
+                    @Override
+                    public void onAdLoaded(@NonNull AppOpenAd appOpenAd) {
+                        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                handler.onError();
+                            public void onAdDismissedFullScreenContent() {
+                                loading.dismiss();
+                                preLoad.Load_App_Open(index);
+                                handler.onSuccess();
                             }
 
                             @Override
-                            public void onAdLoaded(@NonNull AppOpenAd appOpenAd) {
-                                appOpenAd.show((Activity) context);
-                                appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        handler.onSuccess();
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                        handler.onError();
-                                    }
-                                });
+                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                loading.dismiss();
+                                preLoad.Load_App_Open(index);
+                                handler.onError(adError.getMessage());
                             }
                         });
-            }
-        } else {
-            handler.onSuccess();
-        }
+                        appOpenAd.show(activity);
+                    }
+                });
     }
 
-    public void showBannerAds(int index, LinearLayout container) {
-        if (isEnabled) {
-            try {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                AdView adView = new AdView(context);
-                LinearLayout.LayoutParams layoutParams =
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                adView.setLayoutParams(layoutParams);
-                adView.setAdUnitId(initializer.getAdMobIds().getBannerId(index));
-                adView.setAdSize(AdSize.BANNER);
-                container.removeAllViews();
-                container.addView(adView);
-                adView.loadAd(adRequest);
-            } catch (Exception e) {
-                System.out.println("Banner load error : " + Objects.requireNonNull(e.getMessage()));
-            }
-        }
+    public void showBannerAds(int index, @NonNull LinearLayout container) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        AdView adView = new AdView(container.getContext());
+        container.removeAllViews();
+        container.addView(adView);
+
+        container.post(() -> {
+            int width = container.getWidth();
+            if (width == 0) width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            int adWidth = Math.round(width / Resources.getSystem().getDisplayMetrics().density);
+            AdSize adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(application, adWidth);
+
+            adView.setAdUnitId(adUnitResolver.bannerId(index));
+            adView.setAdSize(adSize);
+            adView.loadAd(adRequest);
+        });
     }
 
-    public void showNativeAds(int index, LinearLayout container) {
-        if (isEnabled) {
-            try {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.small_native_ad_layout, null, false);
-                container.removeAllViews();
-                container.addView(layout);
-                TemplateView nativeAdView = layout.findViewById(R.id.my_template);
-                AdLoader loader = new AdLoader.Builder(context, initializer.getAdMobIds().getNativeId(index))
-                        .forNativeAd(nativeAd -> {
-                            NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
-                            nativeAdView.setVisibility(View.VISIBLE);
-                            nativeAdView.setStyles(style);
-                            nativeAdView.setNativeAd(nativeAd);
-                        }).withAdListener(new AdListener() {
+    public void showNativeAds(int index, @NonNull LinearLayout container, @NonNull NativeAdsSize size) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
+        try {
+            int LayoutRes = (size == NativeAdsSize.SMALL) ? R.layout.small_native_ad_layout : R.layout.medium_native_ad_layout;
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(LayoutRes, container, false);
+            container.removeAllViews();
+            container.addView(layout);
+            int templateId = (size == NativeAdsSize.SMALL) ? R.id.my_template : R.id.my_template_medium;
+            TemplateView templateView = layout.findViewById(templateId);
+
+            AdLoader loader = new AdLoader.Builder(container.getContext(), adUnitResolver.nativeId(index))
+                    .forNativeAd(nativeAd -> {
+                        NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
+                        templateView.setVisibility(View.VISIBLE);
+                        templateView.setStyles(style);
+                        templateView.setNativeAd(nativeAd);
+
+                        templateView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                             @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                nativeAdView.setVisibility(View.GONE);
-                                System.out.println("Native ad load failed.");
-                            }
-                        }).build();
-                loader.loadAd(adRequest);
-            } catch (Exception e) {
-                System.out.println("Native ad show process failed : " + Objects.requireNonNull(e.getMessage()));
-            }
-        }
-    }
+                            public void onViewAttachedToWindow(@NonNull View view) {
 
-    public void showNativeAdsMedium(int index, LinearLayout container) {
-        if (isEnabled) {
-            try{
-                AdRequest adRequest = new AdRequest.Builder().build();
-                LinearLayout layout = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.medium_native_ad_layout, null, false);
-                container.removeAllViews();
-                container.addView(layout);
-                TemplateView templateView = layout.findViewById(R.id.my_template_medium);
-                AdLoader loader = new AdLoader.Builder(context, initializer.getAdMobIds().getNativeId(index))
-                        .forNativeAd(nativeAd -> {
-                            NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
-                            templateView.setVisibility(View.VISIBLE);
-                            templateView.setStyles(style);
-                            templateView.setNativeAd(nativeAd);
-                        }).withAdListener(new AdListener() {
-                            @Override
-                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                templateView.setVisibility(View.GONE);
-                                System.out.println("Medium Native load failed : " + loadAdError.getMessage());
                             }
-                        }).build();
-                loader.loadAd(adRequest);
-            } catch (Exception e) {
-                System.out.println("Medium Native ad show process failed :" + Objects.requireNonNull(e.getMessage()));
-            }
+
+                            @Override
+                            public void onViewDetachedFromWindow(@NonNull View view) {
+                                nativeAd.destroy();
+                            }
+                        });
+                    })
+                    .withAdListener(new AdListener() {
+                        @Override
+                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                            templateView.setVisibility(View.GONE);
+                            Log.w("AdsManager", "Native ad (" + size + ") failed to load: " + loadAdError.getMessage());
+                        }
+                    })
+                    .build();
+            loader.loadAd(new AdRequest.Builder().build());
+        } catch (Exception e) {
+            Log.e("AdsManager", "Error showing native ads: " + e.getMessage());
         }
     }
 }

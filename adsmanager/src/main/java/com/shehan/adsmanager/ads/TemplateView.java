@@ -1,5 +1,5 @@
 
-package com.shehan.adsmanager.Ads;
+package com.shehan.adsmanager.ads;
 
 import android.content.Context;
 import android.content.res.TypedArray;

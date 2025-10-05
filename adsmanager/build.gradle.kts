@@ -21,6 +21,13 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 
     compileOptions {
@@ -37,6 +44,8 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.play.services.ads)
     implementation(libs.error.prone.annotations)
+    implementation(libs.lottie)
+    implementation(libs.sdp.android)
 }
 
 afterEvaluate {
@@ -45,7 +54,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.github.shehan-077"
                 artifactId = "Admob-Ads-Manager"
-                version = "2.0.1"
+                version = "3.0.0"
 
                 artifact(tasks.named("bundleReleaseAar").get())
             }

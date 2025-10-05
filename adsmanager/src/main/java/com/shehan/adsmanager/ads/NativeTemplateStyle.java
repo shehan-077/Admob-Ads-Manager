@@ -1,4 +1,4 @@
-package com.shehan.adsmanager.Ads;
+package com.shehan.adsmanager.ads;
 
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;

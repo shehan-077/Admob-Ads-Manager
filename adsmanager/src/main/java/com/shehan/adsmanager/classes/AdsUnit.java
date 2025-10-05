@@ -1,4 +1,4 @@
-package com.shehan.adsmanager.Class;
+package com.shehan.adsmanager.classes;
 
 public enum AdsUnit {
 
