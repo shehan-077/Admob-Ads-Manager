@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.DeprecatedSinceApi;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -217,7 +218,7 @@ public class AdsManager {
     }
 
     public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) { handler.onSuccess(); return;}
 
         loading.show(activity, loaderTintColor);
 
@@ -253,7 +254,7 @@ public class AdsManager {
     }
 
     public void showAppOpenAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
 
         loading.show(activity, loaderTintColor);
 
