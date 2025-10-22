@@ -44,9 +44,9 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:3.0.1'
-implementation 'com.google.android.gms:play-services-ads:24.6.0'
-implementation 'com.airbnb.android:lottie:6.6.9'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:3.0.3'
+implementation 'com.google.android.gms:play-services-ads:24.7.0'
+implementation 'com.airbnb.android:lottie:6.6.10'
 ```
 
 ### Step 3: Configure Permissions & App ID
@@ -310,11 +310,10 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 ---
 
-## 🧩 What's New in 3.0.1
+## 🧩 What's New in 3.0.3
 
-* 🐞 Fixed: Missing `handle.onSuccess()` callback when ads were disabled for **App Open** and **Rewarded Interstitial** ads.
-* ⚡  Improved stability when ads are disabled or unavailable.
-* ✅ Compatible with existing integration — no API changes required.
+* 🐞 Fixed: **Native Medium** ads height issue fixed.
+* 🐞 Fixed: Some minor bug fixed.
 
 ---
 
