@@ -31,7 +31,7 @@ public class App extends Application {
                 )
         );
 
-        AdsManager.init(this, initializer, AdsStatus.DISABLED);
+        AdsManager.init(this, initializer, AdsStatus.TESTING);
         AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.white));
 
         AdsManager.getInstance().preLoad(AdsUnit.INTERSTITIAL, 0);

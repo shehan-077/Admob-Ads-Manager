@@ -32,7 +32,7 @@ public final class LoadingOverlay {
 
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.custom_loading);
+        dialog.setContentView(R.layout.adsmanager_loading_overlay);
         dialog.setCancelable(false);
 
         if (dialog.getWindow() != null) {
@@ -40,8 +40,9 @@ public final class LoadingOverlay {
             dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
 
-        lottie = dialog.findViewById(R.id.lottieView);
-        lottie.setRenderMode(RenderMode.HARDWARE);
+        lottie = dialog.findViewById(R.id.adsManager_lottieView);
+        try {lottie.setRenderMode(RenderMode.HARDWARE); }
+        catch (Throwable t) { lottie.setRenderMode(RenderMode.AUTOMATIC); }
         lottie.setRepeatCount(LottieDrawable.INFINITE);
 
         if (tintColor != null) {

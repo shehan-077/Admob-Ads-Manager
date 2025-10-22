@@ -6,13 +6,13 @@ import java.util.Objects;
 
 public class AdMobIds {
 
-    private String appId;
-    private List<String> interstitialIds;
-    private List<String> bannerIds;
-    private List<String> appOpenIds;
-    private List<String> rewardIds;
-    private List<String> nativeIds;
-    private List<String> rewardIntIds;
+    private final String appId;
+    private final List<String> interstitialIds;
+    private final List<String> bannerIds;
+    private final List<String> appOpenIds;
+    private final List<String> rewardIds;
+    private final List<String> nativeIds;
+    private final List<String> rewardIntIds;
 
     public AdMobIds(String appId,
                     List<String> interstitialIds,

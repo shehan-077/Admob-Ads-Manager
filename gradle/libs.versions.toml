@@ -6,9 +6,10 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 appcompat = "1.7.1"
 material = "1.13.0"
-playServicesAds = "24.6.0"
-lottie = "6.6.9"
+playServicesAds = "24.7.0"
+lottie = "6.6.10"
 sdpAndroid = "1.1.1"
+userMessagingPlatform = "3.2.0"
 
 [libraries]
 error_prone_annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "error_prone_annotations" }
@@ -20,6 +21,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 sdp-android = { module = "com.intuit.sdp:sdp-android", version.ref = "sdpAndroid" }
+user-messaging-platform = { module = "com.google.android.ump:user-messaging-platform", version.ref = "userMessagingPlatform" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

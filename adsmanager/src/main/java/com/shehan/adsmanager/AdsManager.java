@@ -334,13 +334,21 @@ public class AdsManager {
     public void showNativeAds(int index, @NonNull LinearLayout container, @NonNull NativeAdsSize size) {
         if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
 
+        if (size == NativeAdsSize.SMALL) {
+            showNativeAdsSmall(index, container);
+        } else if (size == NativeAdsSize.MEDIUM) {
+            showNativeAdsMedium(index, container);
+        }
+    }
+
+    private void showNativeAdsSmall(int index, @NonNull LinearLayout container) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
         try {
-            int LayoutRes = (size == NativeAdsSize.SMALL) ? R.layout.small_native_ad_layout : R.layout.medium_native_ad_layout;
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(LayoutRes, container, false);
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(R.layout.small_native_ad_layout, container, false);
             container.removeAllViews();
             container.addView(layout);
-            int templateId = (size == NativeAdsSize.SMALL) ? R.id.my_template : R.id.my_template_medium;
-            TemplateView templateView = layout.findViewById(templateId);
+            TemplateView templateView = layout.findViewById(R.id.my_template);
 
             AdLoader loader = new AdLoader.Builder(container.getContext(), adUnitResolver.nativeId(index))
                     .forNativeAd(nativeAd -> {
@@ -365,7 +373,49 @@ public class AdsManager {
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                             templateView.setVisibility(View.GONE);
-                            Log.w("AdsManager", "Native ad (" + size + ") failed to load: " + loadAdError.getMessage());
+                            Log.w("AdsManager", "Native ad small failed to load: " + loadAdError.getMessage());
+                        }
+                    })
+                    .build();
+            loader.loadAd(new AdRequest.Builder().build());
+        } catch (Exception e) {
+            Log.e("AdsManager", "Error showing native ads: " + e.getMessage());
+        }
+    }
+
+    private void showNativeAdsMedium(int index, @NonNull LinearLayout container) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+
+        try {
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(R.layout.medium_native_ad_layout, container, false);
+            container.removeAllViews();
+            container.addView(layout);
+            TemplateView templateView = layout.findViewById(R.id.my_template_medium);
+
+            AdLoader loader = new AdLoader.Builder(container.getContext(), adUnitResolver.nativeId(index))
+                    .forNativeAd(nativeAd -> {
+                        NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
+                        templateView.setVisibility(View.VISIBLE);
+                        templateView.setStyles(style);
+                        templateView.setNativeAd(nativeAd);
+
+                        templateView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                            @Override
+                            public void onViewAttachedToWindow(@NonNull View view) {
+
+                            }
+
+                            @Override
+                            public void onViewDetachedFromWindow(@NonNull View view) {
+                                nativeAd.destroy();
+                            }
+                        });
+                    })
+                    .withAdListener(new AdListener() {
+                        @Override
+                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                            templateView.setVisibility(View.GONE);
+                            Log.w("AdsManager", "Native ad Medium failed to load: " + loadAdError.getMessage());
                         }
                     })
                     .build();
