@@ -32,7 +32,7 @@ public final class LoadingOverlay {
 
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.adsmanager_loading_overlay);
+        dialog.setContentView(R.layout.ads_manager_loading_overlay_layout);
         dialog.setCancelable(false);
 
         if (dialog.getWindow() != null) {

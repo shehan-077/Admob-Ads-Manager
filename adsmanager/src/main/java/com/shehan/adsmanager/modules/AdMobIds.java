@@ -1,6 +1,5 @@
 package com.shehan.adsmanager.modules;
 
-
 import java.util.List;
 import java.util.Objects;
 

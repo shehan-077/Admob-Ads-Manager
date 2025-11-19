@@ -11,8 +11,8 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 import com.shehan.adsmanager.AdsManager;
-import com.shehan.adsmanager.classes.AdsUnit;
 import com.shehan.adsmanager.callback.RequestHandler;
+import com.shehan.adsmanager.callback.RewardRequestHandler;
 import com.shehan.adsmanager.enums.NativeAdsSize;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,29 +65,59 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnReward.setOnClickListener(v-> {
-            AdsManager.getInstance().showRewardAds(this, 0, new RequestHandler() {
+            AdsManager.getInstance().showRewardAds(this, 0, new RewardRequestHandler() {
                 @Override
-                public void onSuccess() {
-                    Toast.makeText(MainActivity.this, "Reward ad showed.", Toast.LENGTH_SHORT).show();
+                public void onShowed() {
+                    Toast.makeText(MainActivity.this, "Reward Ads Showed.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onDismissed() {
+                    Toast.makeText(MainActivity.this, "Reward Ads Dismissed.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onRewarded() {
+                    Toast.makeText(MainActivity.this, "User Rewarded.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailedToShow(String error) {
+                    Toast.makeText(MainActivity.this, "Reward Ads Failed to Show.", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onError(String error) {
-                    Toast.makeText(MainActivity.this, "Reward ad show failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Reward Ads Show Error.", Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
         btnRewardInt.setOnClickListener(v-> {
-            AdsManager.getInstance().showRewardIntAds(this,0, new RequestHandler() {
+            AdsManager.getInstance().showRewardIntAds(this, 0, new RewardRequestHandler() {
                 @Override
-                public void onSuccess() {
-                    Toast.makeText(MainActivity.this, "Reward Interstitial ads showed.", Toast.LENGTH_SHORT).show();
+                public void onShowed() {
+                    Toast.makeText(MainActivity.this, "Rewarded Int Ads Showed.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onDismissed() {
+                    Toast.makeText(MainActivity.this, "Rewarded Int Ads Dismissed.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onRewarded() {
+                    Toast.makeText(MainActivity.this, "User Rewarded.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailedToShow(String error) {
+                    Toast.makeText(MainActivity.this, "Rewarded Int Failed to Show.", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onError(String error) {
-                    Toast.makeText(MainActivity.this, "Reward Interstitial ads show failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Rewarded Int Ads Error.", Toast.LENGTH_SHORT).show();
                 }
             });
         });

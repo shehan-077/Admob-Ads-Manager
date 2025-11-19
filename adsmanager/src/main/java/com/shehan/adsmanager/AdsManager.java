@@ -3,7 +3,9 @@ package com.shehan.adsmanager;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,15 +25,18 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 import com.shehan.adsmanager.ads.NativeTemplateStyle;
 import com.shehan.adsmanager.ads.TemplateView;
+import com.shehan.adsmanager.callback.RewardRequestHandler;
 import com.shehan.adsmanager.classes.AdUnitResolver;
 import com.shehan.adsmanager.classes.AdsManagerInitializer;
 import com.shehan.adsmanager.classes.AdsUnit;
@@ -50,18 +55,22 @@ public class AdsManager {
     private static final AtomicBoolean mobileAdsInitialized = new AtomicBoolean(false);
     private final Application application;
     public AdsManagerInitializer initializer;
-    private AdsStatus adsStatus = AdsStatus.ENABLED;
-    private AdUnitResolver adUnitResolver;
+    private volatile AdsStatus adsStatus = AdsStatus.ENABLED;
+    private volatile AdUnitResolver adUnitResolver;
     private final PreLoad preLoad;
     private final LoadingOverlay loading = new LoadingOverlay();
     @Nullable private Integer loaderTintColor = null;
+    private volatile boolean debugBuild;
 
     private AdsManager(@NonNull Application app) {
         this.application = app;
         preLoad = new PreLoad(this);
+        this.debugBuild = isDebugBuild(app);
     }
 
-    public static AdsManager init (@NonNull Context context, @NonNull AdsManagerInitializer initializer, @NonNull AdsStatus status) {
+    public static AdsManager init (@NonNull Context context,
+                                   @NonNull AdsManagerInitializer initializer,
+                                   @NonNull AdsStatus status) {
         if (adsManager == null) {
             synchronized (AdsManager.class) {
                 if (adsManager == null) {
@@ -72,7 +81,7 @@ public class AdsManager {
         }
         adsManager.initializer = Objects.requireNonNull(initializer, "Initializer cannot be null.");
         adsManager.adsStatus = Objects.requireNonNull(status, "Status cannot be null.");
-        adsManager.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
+        adsManager.rebuildResolver();
 
         if (mobileAdsInitialized.compareAndSet(false, true)) {
             MobileAds.initialize(adsManager.application);
@@ -90,9 +99,21 @@ public class AdsManager {
 
     public void setAdsStatus(@NonNull AdsStatus status) {
         this.adsStatus = status;
-        if (initializer != null) {
-            this.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
-        }
+        rebuildResolver();
+    }
+
+    private void rebuildResolver() {
+        if (initializer == null) return;;
+        AdsStatus status = computeEffectiveStatus(adsStatus, debugBuild);
+        this.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
+    }
+
+    private static AdsStatus computeEffectiveStatus(AdsStatus status,
+                                                    boolean debugBuild) {
+        if (status == AdsStatus.DISABLED) return AdsStatus.DISABLED;
+        if (status == AdsStatus.TESTING) return AdsStatus.TESTING;
+        if (status == AdsStatus.HYBRID) return (debugBuild) ? AdsStatus.TESTING : AdsStatus.ENABLED;
+        return AdsStatus.ENABLED;
     }
 
     public void preLoad(AdsUnit adsUnit, int index) {
@@ -121,6 +142,10 @@ public class AdsManager {
 
     public void destroyAds() {
         preLoad.destroyAds();
+    }
+
+    private boolean isDebugBuild(@NonNull Application app) {
+        return (app.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
     public void showInterstitialAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
@@ -181,18 +206,40 @@ public class AdsManager {
                 });
     }
 
-    public void showRewardAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
+    public void showRewardAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onShowed(); return;}
 
         loading.show(activity, loaderTintColor);
 
         if (preLoad.mReward != null) {
             RewardedAd ad = preLoad.mReward;
             preLoad.mReward = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    loading.dismiss();
+                    handler.onFailedToShow(adError.getMessage());
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    loading.dismiss();
+                    handler.onShowed();
+                    preLoad.Load_Reward_Ads(index);
+                }
+
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loading.dismiss();
+                    handler.onDismissed();
+                    preLoad.Load_Reward_Ads(index);
+                }
+            });
+
             ad.show(activity, rewardItem -> {
                 loading.dismiss();
                 preLoad.Load_Reward_Ads(index);
-                handler.onSuccess();
+                handler.onRewarded();
             });
             return;
         }
@@ -207,28 +254,72 @@ public class AdsManager {
                     }
 
                     @Override
-                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-                        rewardedAd.show(activity, rewardItem -> {
+                    public void onAdLoaded(@NonNull RewardedAd ad) {
+                        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                loading.dismiss();
+                                handler.onFailedToShow(adError.getMessage());
+                            }
+
+                            @Override
+                            public void onAdShowedFullScreenContent() {
+                                loading.dismiss();
+                                handler.onShowed();
+                                preLoad.Load_Reward_Ads(index);
+                            }
+
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                loading.dismiss();
+                                handler.onDismissed();
+                                preLoad.Load_Reward_Ads(index);
+                            }
+                        });
+
+                        ad.show(activity, rewardItem -> {
                             loading.dismiss();
                             preLoad.Load_Reward_Ads(index);
-                            handler.onSuccess();
+                            handler.onRewarded();
                         });
                     }
                 });
     }
 
-    public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) { handler.onSuccess(); return;}
+    public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) { handler.onShowed(); return;}
 
         loading.show(activity, loaderTintColor);
 
         if (preLoad.mRewardInt != null) {
             RewardedInterstitialAd ad = preLoad.mRewardInt;
             preLoad.mRewardInt = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    loading.dismiss();
+                    handler.onFailedToShow(adError.getMessage());
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    loading.dismiss();
+                    handler.onShowed();
+                    preLoad.Load_Reward_Int(index);
+                }
+
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loading.dismiss();
+                    handler.onDismissed();
+                    preLoad.Load_Reward_Int(index);
+                }
+            });
+
             ad.show(activity, rewardItem -> {
                 loading.dismiss();
                 preLoad.Load_Reward_Int(index);
-                handler.onSuccess();
+                handler.onRewarded();
             });
             return;
         }
@@ -243,11 +334,33 @@ public class AdsManager {
                     }
 
                     @Override
-                    public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
-                        rewardedInterstitialAd.show(activity, rewardItem -> {
+                    public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
+                        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                loading.dismiss();
+                                handler.onFailedToShow(adError.getMessage());
+                            }
+
+                            @Override
+                            public void onAdShowedFullScreenContent() {
+                                loading.dismiss();
+                                handler.onShowed();
+                                preLoad.Load_Reward_Int(index);
+                            }
+
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                loading.dismiss();
+                                handler.onDismissed();
+                                preLoad.Load_Reward_Int(index);
+                            }
+                        });
+
+                        ad.show(activity, rewardItem -> {
                             loading.dismiss();
                             preLoad.Load_Reward_Int(index);
-                            handler.onSuccess();
+                            handler.onRewarded();
                         });
                     }
                 });
@@ -314,9 +427,13 @@ public class AdsManager {
     public void showBannerAds(int index, @NonNull LinearLayout container) {
         if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
 
-        AdRequest adRequest = new AdRequest.Builder().build();
+        if (container.getChildCount() > 0) {
+            View v = container.getChildAt(0);
+            if (v instanceof AdView) ((AdView) v).destroy();
+            container.removeAllViews();
+        }
+
         AdView adView = new AdView(container.getContext());
-        container.removeAllViews();
         container.addView(adView);
 
         container.post(() -> {
@@ -327,7 +444,7 @@ public class AdsManager {
 
             adView.setAdUnitId(adUnitResolver.bannerId(index));
             adView.setAdSize(adSize);
-            adView.loadAd(adRequest);
+            adView.loadAd(new AdRequest.Builder().build());
         });
     }
 

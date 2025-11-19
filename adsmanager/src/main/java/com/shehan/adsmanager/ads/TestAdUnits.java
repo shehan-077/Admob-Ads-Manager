@@ -1,6 +1,6 @@
 package com.shehan.adsmanager.ads;
 
-public class TestAdUnits {
+public final class TestAdUnits {
 
     public static final String TEST_BANNER              = "ca-app-pub-3940256099942544/9214589741";
     public static final String TEST_INTERSTITIAL        = "ca-app-pub-3940256099942544/1033173712";

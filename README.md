@@ -7,9 +7,10 @@ Easily integrate Google AdMob into your Android application with just a few line
 ## 🚀 Key Features
 
 * Pre-load ads for a seamless user experience.
-* **NEW in v3.0.0:** Built-in Lottie loading screen with customizable color.
-* **NEW in v3.0.0:** No need to manually provide AdMob test ad units — just set `AdsStatus.TESTING` to use predefined test ads.
-* **NEW in v3.0.0:** Build-in Lottie Loading Screen - shown automatically during the ad load.
+* Built-in Lottie loading screen with customizable color.
+* No need to manually provide AdMob test ad units — just set `AdsStatus.TESTING` to use predefined test ads.
+* Build-in Lottie Loading Screen - shown automatically during the ad load.
+* Automatically shows **test ads in debug builds** and **real ads in release builds**
 
 ---
 
@@ -44,9 +45,9 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:3.0.3'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.0'
 implementation 'com.google.android.gms:play-services-ads:24.7.0'
-implementation 'com.airbnb.android:lottie:6.6.10'
+implementation 'com.airbnb.android:lottie:6.7.1'
 ```
 
 ### Step 3: Configure Permissions & App ID
@@ -230,15 +231,30 @@ AdsManager.getInstance().showInterstitialAds(this, 0, new RequestHandler() {
 ### Rewarded Ad
 
 ```java
-AdsManager.getInstance().showRewardAds(this, 0, new RequestHandler() {
+AdsManager.getInstance().showRewardAds(this, 0, new RewardRequestHandler() {
     @Override
-    public void onSuccess() {
-        // Reward ad showed.
+    public void onShowed() {
+        Toast.makeText(MainActivity.this, "Reward Ads Showed.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDismissed() {
+        Toast.makeText(MainActivity.this, "Reward Ads Dismissed.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewarded() {
+        Toast.makeText(MainActivity.this, "User Rewarded.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onFailedToShow(String error) {
+        Toast.makeText(MainActivity.this, "Reward Ads Failed to Show.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onError(String error) {
-        // Handle error.
+        Toast.makeText(MainActivity.this, "Reward Ads Show Error.", Toast.LENGTH_SHORT).show();
     }
 });
 ```
@@ -246,15 +262,30 @@ AdsManager.getInstance().showRewardAds(this, 0, new RequestHandler() {
 ### Rewarded Interstitial Ad
 
 ```java
-AdsManager.getInstance().showRewardIntAds(this,0, new RequestHandler() {
+AdsManager.getInstance().showRewardIntAds(this, 0, new RewardRequestHandler() {
     @Override
-    public void onSuccess() {
-        // Reward Interstitial ads showed.
+    public void onShowed() {
+        Toast.makeText(MainActivity.this, "Rewarded Int Ads Showed.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDismissed() {
+        Toast.makeText(MainActivity.this, "Rewarded Int Ads Dismissed.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewarded() {
+        Toast.makeText(MainActivity.this, "User Rewarded.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onFailedToShow(String error) {
+        Toast.makeText(MainActivity.this, "Rewarded Int Failed to Show.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onError(String error) {
-        // Handle error.
+        Toast.makeText(MainActivity.this, "Rewarded Int Ads Error.", Toast.LENGTH_SHORT).show();
     }
 });
 ```
@@ -283,7 +314,7 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 * **`AdsManagerInitializer`**: Holds your app and ad unit IDs
 * **`AdsManager`**: Core class to preload, show, and manage ads
-* **`AdsStatus`** Control whether ads are live, disabled, or in testing mode
+* **`AdsStatus`** Control whether ads are live, disabled, testing, or in hybrid mode
 * **`NativeAdsSize`** Enum for choosing native ad template size (SMALL or MEDIUM)
 * **`LoadingOverlay`** Build-in loading animation (Lottie-based) shown automatically during ad loading
 
@@ -314,6 +345,14 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 * 🐞 Fixed: **Native Medium** ads height issue fixed.
 * 🐞 Fixed: Some minor bug fixed.
+
+---
+
+## 🧩 What's New in 3.1.0
+* 🪝 **Rewarded Ads now support more callbacks** (reward earned, dismissed, failed, etc.).
+* 🪝 **Rewarded Interstitial Ads now support more callbacks**.
+* ⚡ **New AdsStatus.HYBRID**  
+  → Automatically shows **test ads in debug builds** and **real ads in release builds**.
 
 ---
 

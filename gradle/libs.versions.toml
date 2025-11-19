@@ -1,15 +1,15 @@
 [versions]
 agp = "8.8.2"
-error_prone_annotations = "2.42.0"
+error_prone_annotations = "2.43.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 playServicesAds = "24.7.0"
-lottie = "6.6.10"
+lottie = "6.7.1"
 sdpAndroid = "1.1.1"
-userMessagingPlatform = "3.2.0"
+userMessagingPlatform = "4.0.0"
 
 [libraries]
 error_prone_annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "error_prone_annotations" }

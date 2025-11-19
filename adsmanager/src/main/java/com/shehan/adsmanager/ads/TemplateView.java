@@ -232,11 +232,6 @@ public class TemplateView extends FrameLayout {
     nativeAdView.setNativeAd(nativeAd);
   }
 
-  /**
-   * To prevent memory leaks, make sure to destroy your ad when you don't need it anymore. This
-   * method does not destroy the template view.
-   * https://developers.google.com/admob/android/native-unified#destroy_ad
-   */
   public void destroyNativeAd() {
     nativeAd.destroy();
   }
