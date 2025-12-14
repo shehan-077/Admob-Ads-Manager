@@ -27,8 +27,10 @@ public final class LoadingOverlay {
     private LottieAnimationView lottie;
 
     public void show(@NonNull Activity activity, @Nullable Integer tintColor) {
-        if (activity.isFinishing()) return;
-        if (dialog != null && dialog.isShowing()) return;
+        if (activity.isFinishing())
+            return;
+        if (dialog != null && dialog.isShowing())
+            return;
 
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -41,12 +43,15 @@ public final class LoadingOverlay {
         }
 
         lottie = dialog.findViewById(R.id.adsManager_lottieView);
-        try {lottie.setRenderMode(RenderMode.HARDWARE); }
-        catch (Throwable t) { lottie.setRenderMode(RenderMode.AUTOMATIC); }
+        try {
+            lottie.setRenderMode(RenderMode.HARDWARE);
+        } catch (Throwable t) {
+            lottie.setRenderMode(RenderMode.AUTOMATIC);
+        }
         lottie.setRepeatCount(LottieDrawable.INFINITE);
 
         if (tintColor != null) {
-            CustomizeLoadingView(tintColor);
+            customizeLoadingView(tintColor);
         }
 
         lottie.playAnimation();
@@ -56,7 +61,8 @@ public final class LoadingOverlay {
         if (activity instanceof LifecycleOwner) {
             LifecycleOwner owner = (LifecycleOwner) activity;
             owner.getLifecycle().addObserver(new DefaultLifecycleObserver() {
-                @Override public void onDestroy(@NonNull LifecycleOwner lifecycleOwner) {
+                @Override
+                public void onDestroy(@NonNull LifecycleOwner lifecycleOwner) {
                     dismiss();
                     owner.getLifecycle().removeObserver(this);
                 }
@@ -65,19 +71,21 @@ public final class LoadingOverlay {
     }
 
     public void dismiss() {
-        if (lottie != null) lottie.cancelAnimation();
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        if (lottie != null)
+            lottie.cancelAnimation();
+        if (dialog != null && dialog.isShowing())
+            dialog.dismiss();
         lottie = null;
         dialog = null;
     }
 
-    private void CustomizeLoadingView(int color) {
-        if (lottie == null) return;
+    private void customizeLoadingView(int color) {
+        if (lottie == null)
+            return;
 
         lottie.addValueCallback(
                 new KeyPath("**"),
                 LottieProperty.COLOR_FILTER,
-                frameInfo -> new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
-        );
+                frameInfo -> new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
     }
 }

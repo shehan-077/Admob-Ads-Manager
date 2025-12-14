@@ -59,7 +59,8 @@ public class AdsManager {
     private volatile AdUnitResolver adUnitResolver;
     private final PreLoad preLoad;
     private final LoadingOverlay loading = new LoadingOverlay();
-    @Nullable private Integer loaderTintColor = null;
+    @Nullable
+    private Integer loaderTintColor = null;
     private volatile boolean debugBuild;
 
     private AdsManager(@NonNull Application app) {
@@ -68,9 +69,9 @@ public class AdsManager {
         this.debugBuild = isDebugBuild(app);
     }
 
-    public static AdsManager init (@NonNull Context context,
-                                   @NonNull AdsManagerInitializer initializer,
-                                   @NonNull AdsStatus status) {
+    public static AdsManager init(@NonNull Context context,
+            @NonNull AdsManagerInitializer initializer,
+            @NonNull AdsStatus status) {
         if (adsManager == null) {
             synchronized (AdsManager.class) {
                 if (adsManager == null) {
@@ -92,32 +93,38 @@ public class AdsManager {
     public static AdsManager getInstance() {
         AdsManager manager = adsManager;
         if (manager == null) {
-            throw new IllegalStateException("AdsManager not initialized. Call getInstance(context, initializer, status) first.");
+            throw new IllegalStateException(
+                    "AdsManager not initialized. Call getInstance(context, initializer, status) first.");
         }
         return manager;
     }
 
-    public void setAdsStatus(@NonNull AdsStatus status) {
+    public synchronized void setAdsStatus(@NonNull AdsStatus status) {
         this.adsStatus = status;
         rebuildResolver();
     }
 
     private void rebuildResolver() {
-        if (initializer == null) return;;
+        if (initializer == null)
+            return;
         AdsStatus status = computeEffectiveStatus(adsStatus, debugBuild);
         this.adUnitResolver = new AdUnitResolver(initializer.getAdMobIds(), status);
     }
 
     private static AdsStatus computeEffectiveStatus(AdsStatus status,
-                                                    boolean debugBuild) {
-        if (status == AdsStatus.DISABLED) return AdsStatus.DISABLED;
-        if (status == AdsStatus.TESTING) return AdsStatus.TESTING;
-        if (status == AdsStatus.HYBRID) return (debugBuild) ? AdsStatus.TESTING : AdsStatus.ENABLED;
+            boolean debugBuild) {
+        if (status == AdsStatus.DISABLED)
+            return AdsStatus.DISABLED;
+        if (status == AdsStatus.TESTING)
+            return AdsStatus.TESTING;
+        if (status == AdsStatus.HYBRID)
+            return (debugBuild) ? AdsStatus.TESTING : AdsStatus.ENABLED;
         return AdsStatus.ENABLED;
     }
 
     public void preLoad(AdsUnit adsUnit, int index) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled())
+            return;
         switch (adsUnit) {
             case INTERSTITIAL:
                 preLoad.Load_Int_Ads(index);
@@ -134,11 +141,17 @@ public class AdsManager {
         }
     }
 
-    public Application application() {return application;}
+    public Application application() {
+        return application;
+    }
 
-    public AdUnitResolver resolver() {return adUnitResolver;}
+    public AdUnitResolver resolver() {
+        return adUnitResolver;
+    }
 
-    public void setLoadingColor(@ColorInt int color) {this.loaderTintColor = color;}
+    public void setLoadingColor(@ColorInt int color) {
+        this.loaderTintColor = color;
+    }
 
     public void destroyAds() {
         preLoad.destroyAds();
@@ -149,7 +162,10 @@ public class AdsManager {
     }
 
     public void showInterstitialAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+            handler.onSuccess();
+            return;
+        }
 
         loading.show(activity, loaderTintColor);
 
@@ -207,7 +223,10 @@ public class AdsManager {
     }
 
     public void showRewardAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onShowed(); return;}
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+            handler.onShowed();
+            return;
+        }
 
         loading.show(activity, loaderTintColor);
 
@@ -287,7 +306,10 @@ public class AdsManager {
     }
 
     public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) { handler.onShowed(); return;}
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+            handler.onShowed();
+            return;
+        }
 
         loading.show(activity, loaderTintColor);
 
@@ -367,7 +389,10 @@ public class AdsManager {
     }
 
     public void showAppOpenAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {handler.onSuccess(); return;}
+        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+            handler.onSuccess();
+            return;
+        }
 
         loading.show(activity, loaderTintColor);
 
@@ -425,11 +450,13 @@ public class AdsManager {
     }
 
     public void showBannerAds(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled())
+            return;
 
         if (container.getChildCount() > 0) {
             View v = container.getChildAt(0);
-            if (v instanceof AdView) ((AdView) v).destroy();
+            if (v instanceof AdView)
+                ((AdView) v).destroy();
             container.removeAllViews();
         }
 
@@ -438,7 +465,8 @@ public class AdsManager {
 
         container.post(() -> {
             int width = container.getWidth();
-            if (width == 0) width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            if (width == 0)
+                width = Resources.getSystem().getDisplayMetrics().widthPixels;
             int adWidth = Math.round(width / Resources.getSystem().getDisplayMetrics().density);
             AdSize adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(application, adWidth);
 
@@ -449,7 +477,8 @@ public class AdsManager {
     }
 
     public void showNativeAds(int index, @NonNull LinearLayout container, @NonNull NativeAdsSize size) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled())
+            return;
 
         if (size == NativeAdsSize.SMALL) {
             showNativeAdsSmall(index, container);
@@ -459,10 +488,12 @@ public class AdsManager {
     }
 
     private void showNativeAdsSmall(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled())
+            return;
 
         try {
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(R.layout.small_native_ad_layout, container, false);
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext())
+                    .inflate(R.layout.small_native_ad_layout, container, false);
             container.removeAllViews();
             container.addView(layout);
             TemplateView templateView = layout.findViewById(R.id.my_template);
@@ -501,10 +532,12 @@ public class AdsManager {
     }
 
     private void showNativeAdsMedium(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled())
+            return;
 
         try {
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext()).inflate(R.layout.medium_native_ad_layout, container, false);
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(container.getContext())
+                    .inflate(R.layout.medium_native_ad_layout, container, false);
             container.removeAllViews();
             container.addView(layout);
             TemplateView templateView = layout.findViewById(R.id.my_template_medium);

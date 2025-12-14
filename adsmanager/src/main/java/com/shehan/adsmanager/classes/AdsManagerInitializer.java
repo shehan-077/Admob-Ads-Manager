@@ -14,6 +14,8 @@ public class AdsManagerInitializer {
     public static AdsManagerInitializer getInstance(AdMobIds adMobIds) {
         if (initializer == null) {
             initializer = new AdsManagerInitializer(adMobIds);
+        } else {
+            initializer.setAdMobIds(adMobIds);
         }
 
         return initializer;

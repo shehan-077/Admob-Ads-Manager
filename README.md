@@ -7,10 +7,9 @@ Easily integrate Google AdMob into your Android application with just a few line
 ## 🚀 Key Features
 
 * Pre-load ads for a seamless user experience.
-* Built-in Lottie loading screen with customizable color.
+* Built-in Lottie loading screen with customizable color - shown automatically during the ad load.
 * No need to manually provide AdMob test ad units — just set `AdsStatus.TESTING` to use predefined test ads.
-* Build-in Lottie Loading Screen - shown automatically during the ad load.
-* Automatically shows **test ads in debug builds** and **real ads in release builds**
+* Automatically shows **test ads in debug builds** and **real ads in release builds** with `AdsStatus.HYBRID`
 
 ---
 
@@ -45,8 +44,8 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.0'
-implementation 'com.google.android.gms:play-services-ads:24.7.0'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.1'
+implementation 'com.google.android.gms:play-services-ads:24.9.0'
 implementation 'com.airbnb.android:lottie:6.7.1'
 ```
 
@@ -153,14 +152,14 @@ AdsManager.getInstance().preLoad(AdsUnit.REWARD_INT, 0);
 
 ---
 
-## Build-in Lottie Loading Screen (V 3.0.0)
+## Built-in Lottie Loading Screen (V 3.0.0)
 
 ```java
 AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
 ```
 
 * `this`: your `Context`
-* `R.color.primary`: Customize color you want to show
+* `R.color.primary`: Customize the color you want to show
 * Optional – if not defined, the default color (white) will be used.
 
 ---
@@ -192,6 +191,9 @@ public class App extends Application {
     }
 }
 ```
+
+* `this`: your `Context`
+
 ---
 
 ## ▶️ Show Ads
@@ -211,6 +213,8 @@ AdsManager.getInstance().showAppOpenAds(this, 0, new RequestHandler() {
     }
 });
 ```
+* `this`: your `Context`
+* `0`: Index number of AdMob ad unit.
 
 ### Interstitial Ad
 
@@ -227,6 +231,9 @@ AdsManager.getInstance().showInterstitialAds(this, 0, new RequestHandler() {
     }
 });
 ```
+
+* `this`: your `Context`
+* `0`: Index number of AdMob ad unit.
 
 ### Rewarded Ad
 
@@ -259,6 +266,9 @@ AdsManager.getInstance().showRewardAds(this, 0, new RewardRequestHandler() {
 });
 ```
 
+* `this`: your `Context`
+* `0`: Index number of AdMob ad unit.
+
 ### Rewarded Interstitial Ad
 
 ```java
@@ -289,6 +299,8 @@ AdsManager.getInstance().showRewardIntAds(this, 0, new RewardRequestHandler() {
     }
 });
 ```
+* `this`: your `Context`
+* `0`: Index number of AdMob ad unit.
 
 ### Banner Ad
 
@@ -308,53 +320,45 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeContainer
 AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumContainer), NativeAdsSize.MEDIUM);
 ```
 
+* `0`: Index number of AdMob ad unit.
+* `findViewById(R.id.main_bannerContainer)`: Banner container view
+* `findViewById(R.id.main_nativeContainer)`: Native small ad container view
+* `findViewById(R.id.main_nativeMediumContainer)`: Native medium ad container view
+
 ---
 
 ## 🧾 Explanation
 
 * **`AdsManagerInitializer`**: Holds your app and ad unit IDs
 * **`AdsManager`**: Core class to preload, show, and manage ads
-* **`AdsStatus`** Control whether ads are live, disabled, testing, or in hybrid mode
-* **`NativeAdsSize`** Enum for choosing native ad template size (SMALL or MEDIUM)
-* **`LoadingOverlay`** Build-in loading animation (Lottie-based) shown automatically during ad loading
+* **`AdsStatus`**: Control whether ads are live, disabled, testing, or in hybrid mode
+* **`NativeAdsSize`**: Enum for choosing native ad template size (SMALL or MEDIUM)
+* **`LoadingOverlay`**: Built-in loading animation (Lottie-based) shown automatically during ad loading
 
 ---
 
 ## 💡 Usage Tips
 
-* Always preload ads to reduce display delay
-* Handle all ad events for reliability
-* Use index-based loading for region-based or fallback logic
-* Follow AdMob policy strictly to avoid account issues
-* Use `AdsStatus.TESTING` during development - no need to set up test ad Ids
+* Always preload ads to reduce display delay (Interstitial, Reward, and Reward Interstitial Ads only).
+* Handle all ad events for reliability.
+* Use index-based loading for region-based or fallback logic.
+* Follow AdMob policy strictly to avoid account issues.
+* Use `AdsStatus.HYBRID` during development - Ads manager shows testing ads and after production, ads will automatically switch to real ad units defined by you.
 
 ---
 
-## 🆕 What's New in 3.0.0
+## 🆕 What's New in 3.0.0 (Above)
 
 * ✅ **Built-in Lottie Loading Screen** – shown automatically during ad load
 * 🎨 **Customizable Loading Color** – adapt to your app theme
-* ⚙️ **`AdsStatus.TESTING` Mode** – automatically uses predefine AdMob test units
-* 🧠 **Singleton Initialization** — initialize once globally, use anywhere
-* 🧩 **Unified Native Ads API** — select size via NativeAdsSize.SMALL or NativeAdsSize.MEDIUM
-* 💡 **Cleaner API** — consistent with Kotlin and Java apps
+* ⚙️ **`AdsStatus.TESTING` Mode** – automatically uses predefined AdMob test units
+* ⚙️ **`AdsStatus.HYBRID` Mode** – automatically uses predefined AdMob test units during development period and after release automatically switches to real ad units defined by you.
+* 🧠 **Singleton Initialization** – initialize once globally, use anywhere
+* 🧩 **Unified Native Ads API** – select size via NativeAdsSize.SMALL or NativeAdsSize.MEDIUM
+* 💡 **Cleaner API** – consistent with Kotlin and Java apps
 
 ---
 
-## 🧩 What's New in 3.0.3
-
-* 🐞 Fixed: **Native Medium** ads height issue fixed.
-* 🐞 Fixed: Some minor bug fixed.
-
----
-
-## 🧩 What's New in 3.1.0
-* 🪝 **Rewarded Ads now support more callbacks** (reward earned, dismissed, failed, etc.).
-* 🪝 **Rewarded Interstitial Ads now support more callbacks**.
-* ⚡ **New AdsStatus.HYBRID**  
-  → Automatically shows **test ads in debug builds** and **real ads in release builds**.
-
----
 
 ## 🎉 Enjoy!
 

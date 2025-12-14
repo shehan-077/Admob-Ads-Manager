@@ -40,7 +40,8 @@ public class PreLoad {
 
     // ---------------- Interstitial ----------------
     public void Load_Int_Ads(int index) {
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
         AdRequest adRequest = new AdRequest.Builder().build();
         String unitId = adsManager.resolver().interstitialId(index);
         loadInterstitial(unitId, adRequest, 0);
@@ -51,7 +52,7 @@ public class PreLoad {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 Log.w("Preload", "Interstitial ads preload failed : " + loadAdError.getMessage());
-                retry(()-> loadInterstitial(unitId, request, attempt + 1), attempt);
+                retry(() -> loadInterstitial(unitId, request, attempt + 1), attempt);
             }
 
             @Override
@@ -64,7 +65,8 @@ public class PreLoad {
 
     // ---------------- App Open ----------------
     public void Load_App_Open(int index) {
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
         String unitId = adsManager.resolver().appOpenId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadAppOpen(unitId, adRequest, 0);
@@ -75,7 +77,7 @@ public class PreLoad {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 Log.w("Preload", "App Open ads preload failed : " + loadAdError.getMessage());
-                retry(()-> loadAppOpen(unitId, request, attempt + 1), attempt);
+                retry(() -> loadAppOpen(unitId, request, attempt + 1), attempt);
             }
 
             @Override
@@ -88,7 +90,8 @@ public class PreLoad {
 
     // ---------------- Reward Ads ----------------
     public void Load_Reward_Ads(int index) {
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
         String unitId = adsManager.resolver().rewardedId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadReward(unitId, adRequest, 0);
@@ -112,13 +115,14 @@ public class PreLoad {
 
     // ---------------- Reward Int Ads ----------------
     public void Load_Reward_Int(int index) {
-        if (isDisabled()) return;
-        String unitId = adsManager.resolver().rewardedId(index);
+        if (isDisabled())
+            return;
+        String unitId = adsManager.resolver().rewardedInterId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadRewardInt(unitId, adRequest, 0);
     }
 
-    private void loadRewardInt (String unitId, AdRequest request, int attempt) {
+    private void loadRewardInt(String unitId, AdRequest request, int attempt) {
         RewardedInterstitialAd.load(application, unitId, request, new RewardedInterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -147,8 +151,9 @@ public class PreLoad {
         return resolver == null || resolver.isDisabled();
     }
 
-    private void retry (Runnable again, int retryCount) {
-        if (retryCount >= MAX_RETRY) return;;
+    private void retry(Runnable again, int retryCount) {
+        if (retryCount >= MAX_RETRY)
+            return;
         mainHandler.postDelayed(again, RETRY_DELAY);
     }
 }
