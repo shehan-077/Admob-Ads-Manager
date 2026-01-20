@@ -32,128 +32,134 @@ public class PreLoad {
     public volatile AppOpenAd mAppOpen;
     public volatile RewardedAd mReward;
     public volatile RewardedInterstitialAd mRewardInt;
+    private final String TAG = "PRELOAD";
 
     public PreLoad(@NonNull AdsManager adsManager) {
         this.adsManager = Objects.requireNonNull(adsManager, "AdsManager cannot be null.");
         this.application = adsManager.application();
     }
 
-    // ---------------- Interstitial ----------------
+    /// ---------------- Interstitial ----------------
     public void Load_Int_Ads(int index) {
-        if (isDisabled())
-            return;
+        if (isDisabled()) return;
+
         AdRequest adRequest = new AdRequest.Builder().build();
         String unitId = adsManager.resolver().interstitialId(index);
         loadInterstitial(unitId, adRequest, 0);
     }
 
-    private void loadInterstitial(String unitId, AdRequest request, int attempt) {
+    private void loadInterstitial(@NonNull String unitId, @NonNull AdRequest request, int attempt) {
         InterstitialAd.load(application, unitId, request, new InterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w("Preload", "Interstitial ads preload failed : " + loadAdError.getMessage());
-                retry(() -> loadInterstitial(unitId, request, attempt + 1), attempt);
+                Log.e(TAG, "Interstitial ads preload failed : " + loadAdError.getMessage());
+                retry(() -> loadInterstitial(unitId, request, attempt + 1), attempt, loadAdError);
             }
 
             @Override
             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                 mInterstitial = interstitialAd;
-                Log.d("Preload", "Interstitial ads preload success");
+                Log.d(TAG, "Interstitial ads preloaded.");
             }
         });
     }
 
-    // ---------------- App Open ----------------
+    /// ---------------- App Open ----------------
     public void Load_App_Open(int index) {
-        if (isDisabled())
-            return;
+        if (isDisabled()) return;
+
         String unitId = adsManager.resolver().appOpenId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadAppOpen(unitId, adRequest, 0);
     }
 
-    private void loadAppOpen(String unitId, AdRequest request, int attempt) {
+    private void loadAppOpen(@NonNull String unitId, @NonNull AdRequest request, int attempt) {
         AppOpenAd.load(application, unitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w("Preload", "App Open ads preload failed : " + loadAdError.getMessage());
-                retry(() -> loadAppOpen(unitId, request, attempt + 1), attempt);
+                Log.e(TAG, "App Open ads preload failed : " + loadAdError.getMessage());
+                retry(() -> loadAppOpen(unitId, request, attempt + 1), attempt, loadAdError);
             }
 
             @Override
             public void onAdLoaded(@NonNull AppOpenAd appOpenAd) {
                 mAppOpen = appOpenAd;
-                Log.d("Preload", "AppOpen preloaded");
+                Log.d(TAG, "App Open ads preloaded.");
             }
         });
     }
 
-    // ---------------- Reward Ads ----------------
+    /// ---------------- Reward Ads ----------------
     public void Load_Reward_Ads(int index) {
-        if (isDisabled())
-            return;
+        if (isDisabled()) return;
+
         String unitId = adsManager.resolver().rewardedId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadReward(unitId, adRequest, 0);
     }
 
-    private void loadReward(String unitId, AdRequest request, int attempt) {
+    private void loadReward(@NonNull String unitId, @NonNull AdRequest request, int attempt) {
         RewardedAd.load(application, unitId, request, new RewardedAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w("Preload", "Rewarded preload failed (" + attempt + "): " + loadAdError.getMessage());
-                retry(() -> loadReward(unitId, request, attempt + 1), attempt);
+                Log.e(TAG, "Rewarded ads preload failed (" + attempt + "): " + loadAdError.getMessage());
+                retry(() -> loadReward(unitId, request, attempt + 1), attempt, loadAdError);
             }
 
             @Override
             public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
                 mReward = rewardedAd;
-                Log.d("Preload", "Rewarded preloaded");
+                Log.d(TAG, "Rewarded ads preloaded.");
             }
         });
     }
 
-    // ---------------- Reward Int Ads ----------------
+    /// ---------------- Reward Int Ads ----------------
     public void Load_Reward_Int(int index) {
-        if (isDisabled())
-            return;
+        if (isDisabled()) return;
+
         String unitId = adsManager.resolver().rewardedInterId(index);
         AdRequest adRequest = new AdRequest.Builder().build();
         loadRewardInt(unitId, adRequest, 0);
     }
 
-    private void loadRewardInt(String unitId, AdRequest request, int attempt) {
+    private void loadRewardInt(@NonNull String unitId, @NonNull AdRequest request, int attempt) {
         RewardedInterstitialAd.load(application, unitId, request, new RewardedInterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                Log.w("Preload", "Rewarded int preload failed (" + attempt + "): " + loadAdError.getMessage());
-                retry(() -> loadRewardInt(unitId, request, attempt + 1), attempt);
+                Log.e(TAG, "Rewarded int ads preload failed (" + attempt + "): " + loadAdError.getMessage());
+                retry(() -> loadRewardInt(unitId, request, attempt + 1), attempt, loadAdError);
             }
 
             @Override
             public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
                 mRewardInt = rewardedInterstitialAd;
-                Log.d("Preload", "Rewarded int preloaded");
+                Log.d(TAG, "Rewarded int ads preloaded.");
             }
         });
     }
 
+    /// ---------------- Destroy all ads ----------------
     public void destroyAds() {
         mAppOpen = null;
         mInterstitial = null;
         mReward = null;
         mRewardInt = null;
-        Log.d("Preload", "Preloaded ads cleared");
+        Log.d(TAG, "Preloaded ads destroyed.");
     }
 
     private boolean isDisabled() {
         AdUnitResolver resolver = adsManager.resolver();
+        Log.d(TAG, "Ads are disabled");
         return resolver == null || resolver.isDisabled();
     }
 
-    private void retry(Runnable again, int retryCount) {
-        if (retryCount >= MAX_RETRY)
-            return;
+    /// ---------------- Retry when ads failed --------------------------
+    private void retry(@NonNull Runnable again, int retryCount, LoadAdError errorCode) {
+        if (retryCount >= MAX_RETRY) return;
+        if (errorCode.getCode() == AdRequest.ERROR_CODE_INVALID_REQUEST) return;
+
+        Log.d(TAG, "Ads preload retrying");
         mainHandler.postDelayed(again, RETRY_DELAY);
     }
 }

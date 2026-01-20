@@ -17,7 +17,7 @@ import com.shehan.adsmanager.enums.NativeAdsSize;
 
 public class MainActivity extends AppCompatActivity {
 
-    CardView btnAppOpen, btnInt, btnReward, btnRewardInt, btnBanner, btnNative, btnNativeMedium, btnNext;
+    CardView btnAppOpen, btnInt, btnReward, btnRewardInt, btnBanner, btnCollapsible, btnNative, btnNativeMedium, btnNext;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         btnReward = findViewById(R.id.main_btnReward);
         btnRewardInt = findViewById(R.id.main_btnRewardInt);
         btnBanner = findViewById(R.id.main_btnBanner);
+        btnCollapsible = findViewById(R.id.main_btnBannerCollapsible);
         btnNative = findViewById(R.id.main_btnNative);
         btnNativeMedium = findViewById(R.id.main_btnNativeMedium);
         btnNext = findViewById(R.id.main_btnNext);
@@ -124,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
 
         btnBanner.setOnClickListener(v-> {
             AdsManager.getInstance().showBannerAds(0, findViewById(R.id.main_bannerContainer));
+        });
+
+        btnCollapsible.setOnClickListener(v-> {
+            AdsManager.getInstance().showBannerAds(0, findViewById(R.id.main_collapsibleContainer));
         });
 
         btnNative.setOnClickListener(v-> {

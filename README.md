@@ -7,6 +7,7 @@ Easily integrate Google AdMob into your Android application with just a few line
 ## 🚀 Key Features
 
 * Pre-load ads for a seamless user experience.
+* Retry automatically when ads fail to load.
 * Built-in Lottie loading screen with customizable color - shown automatically during the ad load.
 * No need to manually provide AdMob test ad units — just set `AdsStatus.TESTING` to use predefined test ads.
 * Automatically shows **test ads in debug builds** and **real ads in release builds** with `AdsStatus.HYBRID`
@@ -44,7 +45,7 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.1'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.2'
 implementation 'com.google.android.gms:play-services-ads:24.9.0'
 implementation 'com.airbnb.android:lottie:6.7.1'
 ```
@@ -125,12 +126,12 @@ public class App extends Application {
 ## 🧠 Create AdsManager
 
 ```java
-AdsManager.init(this, initializer, AdsStatus.ENABLED);
+AdsManager.init(this, initializer, AdsStatus.HYBRID);
 ```
 
 * `this`: your `Application`
 * `initializer`: AdMob config instance
-* `AdsStatus.ENABLED`: enabled ads (`AdsStatus.DISABLED` to disable and `AdsStatus.TESTING` to use test ads)
+* `AdsStatus.HYBRID`: enabled test ads when debugging and switch to real ads when released. (`AdsStatus.DISABLED` to disable and `AdsStatus.TESTING` to use test ads.)
 
 ---
 

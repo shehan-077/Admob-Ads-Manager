@@ -5,17 +5,19 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
-import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.DeprecatedSinceApi;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
@@ -25,11 +27,9 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
@@ -61,7 +61,8 @@ public class AdsManager {
     private final LoadingOverlay loading = new LoadingOverlay();
     @Nullable
     private Integer loaderTintColor = null;
-    private volatile boolean debugBuild;
+    private final boolean debugBuild;
+    private final String TAG = "ADS MANAGER";
 
     private AdsManager(@NonNull Application app) {
         this.application = app;
@@ -87,6 +88,7 @@ public class AdsManager {
         if (mobileAdsInitialized.compareAndSet(false, true)) {
             MobileAds.initialize(adsManager.application);
         }
+        Log.d("ADS MANAGER", "Ads manager initialized complete.");
         return adsManager;
     }
 
@@ -97,11 +99,6 @@ public class AdsManager {
                     "AdsManager not initialized. Call getInstance(context, initializer, status) first.");
         }
         return manager;
-    }
-
-    public synchronized void setAdsStatus(@NonNull AdsStatus status) {
-        this.adsStatus = status;
-        rebuildResolver();
     }
 
     private void rebuildResolver() {
@@ -177,6 +174,7 @@ public class AdsManager {
                 public void onAdDismissedFullScreenContent() {
                     loading.dismiss();
                     preLoad.Load_Int_Ads(index);
+                    Log.d(TAG, "Interstitial ads dismissed.");
                     handler.onSuccess();
                 }
 
@@ -184,6 +182,7 @@ public class AdsManager {
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     loading.dismiss();
                     preLoad.Load_Int_Ads(index);
+                    Log.e(TAG, "Interstitial ads failed to show. Error : " + adError.getMessage());
                     handler.onError(adError.getMessage());
                 }
             });
@@ -197,6 +196,7 @@ public class AdsManager {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         loading.dismiss();
+                        Log.e(TAG, "Interstitial ads failed to load. Error : " + loadAdError.getMessage());
                         handler.onError(loadAdError.getMessage());
                     }
 
@@ -207,6 +207,7 @@ public class AdsManager {
                             public void onAdDismissedFullScreenContent() {
                                 loading.dismiss();
                                 preLoad.Load_Int_Ads(index);
+                                Log.d(TAG, "Interstitial ads loaded.");
                                 handler.onSuccess();
                             }
 
@@ -214,6 +215,7 @@ public class AdsManager {
                             public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                                 loading.dismiss();
                                 preLoad.Load_Int_Ads(index);
+                                Log.e(TAG, "Interstitial ads failed to show. Error : " + adError.getMessage());
                                 handler.onError(adError.getMessage());
                             }
                         });
@@ -225,6 +227,7 @@ public class AdsManager {
     public void showRewardAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
         if (adUnitResolver == null || adUnitResolver.isDisabled()) {
             handler.onShowed();
+            handler.onDismissed();
             return;
         }
 
@@ -237,6 +240,7 @@ public class AdsManager {
                 @Override
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     loading.dismiss();
+                    Log.e(TAG, "Rewarded ads failed to show. Error : " + adError.getMessage());
                     handler.onFailedToShow(adError.getMessage());
                 }
 
@@ -244,6 +248,7 @@ public class AdsManager {
                 public void onAdShowedFullScreenContent() {
                     loading.dismiss();
                     handler.onShowed();
+                    Log.d(TAG, "Rewarded ads showed.");
                     preLoad.Load_Reward_Ads(index);
                 }
 
@@ -251,6 +256,7 @@ public class AdsManager {
                 public void onAdDismissedFullScreenContent() {
                     loading.dismiss();
                     handler.onDismissed();
+                    Log.d(TAG, "Rewarded ads dismissed.");
                     preLoad.Load_Reward_Ads(index);
                 }
             });
@@ -278,6 +284,7 @@ public class AdsManager {
                             @Override
                             public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                                 loading.dismiss();
+                                Log.e(TAG, "Rewarded ads failed to show. Error : " + adError.getMessage());
                                 handler.onFailedToShow(adError.getMessage());
                             }
 
@@ -285,6 +292,7 @@ public class AdsManager {
                             public void onAdShowedFullScreenContent() {
                                 loading.dismiss();
                                 handler.onShowed();
+                                Log.d(TAG, "Rewarded ads showed.");
                                 preLoad.Load_Reward_Ads(index);
                             }
 
@@ -292,6 +300,7 @@ public class AdsManager {
                             public void onAdDismissedFullScreenContent() {
                                 loading.dismiss();
                                 handler.onDismissed();
+                                Log.d(TAG, "Rewarded ads dismissed.");
                                 preLoad.Load_Reward_Ads(index);
                             }
                         });
@@ -308,6 +317,7 @@ public class AdsManager {
     public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
         if (adUnitResolver == null || adUnitResolver.isDisabled()) {
             handler.onShowed();
+            handler.onDismissed();
             return;
         }
 
@@ -320,6 +330,7 @@ public class AdsManager {
                 @Override
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     loading.dismiss();
+                    Log.e(TAG, "Rewarded Int ads failed to show. Error : " + adError.getMessage());
                     handler.onFailedToShow(adError.getMessage());
                 }
 
@@ -327,6 +338,7 @@ public class AdsManager {
                 public void onAdShowedFullScreenContent() {
                     loading.dismiss();
                     handler.onShowed();
+                    Log.d(TAG, "Rewarded Int ads showed.");
                     preLoad.Load_Reward_Int(index);
                 }
 
@@ -334,6 +346,7 @@ public class AdsManager {
                 public void onAdDismissedFullScreenContent() {
                     loading.dismiss();
                     handler.onDismissed();
+                    Log.d(TAG, "Rewarded Int ads dismissed.");
                     preLoad.Load_Reward_Int(index);
                 }
             });
@@ -361,6 +374,7 @@ public class AdsManager {
                             @Override
                             public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                                 loading.dismiss();
+                                Log.e(TAG, "Rewarded Int ads failed to show. Error : " + adError.getMessage());
                                 handler.onFailedToShow(adError.getMessage());
                             }
 
@@ -368,6 +382,7 @@ public class AdsManager {
                             public void onAdShowedFullScreenContent() {
                                 loading.dismiss();
                                 handler.onShowed();
+                                Log.d(TAG, "Rewarded Int ads showed.");
                                 preLoad.Load_Reward_Int(index);
                             }
 
@@ -375,6 +390,7 @@ public class AdsManager {
                             public void onAdDismissedFullScreenContent() {
                                 loading.dismiss();
                                 handler.onDismissed();
+                                Log.d(TAG, "Rewarded Int ads dismissed.");
                                 preLoad.Load_Reward_Int(index);
                             }
                         });
@@ -404,6 +420,7 @@ public class AdsManager {
                 public void onAdDismissedFullScreenContent() {
                     loading.dismiss();
                     preLoad.Load_App_Open(index);
+                    Log.d(TAG, "App Open ads dismissed.");
                     handler.onSuccess();
                 }
 
@@ -411,6 +428,7 @@ public class AdsManager {
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     loading.dismiss();
                     preLoad.Load_App_Open(index);
+                    Log.e(TAG, "App Open ads failed to show. Error : " + adError.getMessage());
                     handler.onError(adError.getMessage());
                 }
             });
@@ -424,6 +442,7 @@ public class AdsManager {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         loading.dismiss();
+                        Log.e(TAG, "App Open ads failed to load. Error : " + loadAdError.getMessage());
                         handler.onError(loadAdError.getMessage());
                     }
 
@@ -434,6 +453,7 @@ public class AdsManager {
                             public void onAdDismissedFullScreenContent() {
                                 loading.dismiss();
                                 preLoad.Load_App_Open(index);
+                                Log.d(TAG, "App Open ads dismissed.");
                                 handler.onSuccess();
                             }
 
@@ -441,6 +461,7 @@ public class AdsManager {
                             public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                                 loading.dismiss();
                                 preLoad.Load_App_Open(index);
+                                Log.e(TAG, "App Open ads failed to show. Error : " + adError.getMessage());
                                 handler.onError(adError.getMessage());
                             }
                         });
@@ -458,10 +479,33 @@ public class AdsManager {
             if (v instanceof AdView)
                 ((AdView) v).destroy();
             container.removeAllViews();
+            container.setVisibility(View.GONE);
         }
 
         AdView adView = new AdView(container.getContext());
         container.addView(adView);
+
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.e(TAG, "Banner ad failed to load: " + loadAdError.getMessage());
+                super.onAdFailedToLoad(loadAdError);
+            }
+
+            @Override
+            public void onAdImpression() {
+                Log.i(TAG, "Banner ad impressed.");
+                super.onAdImpression();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                Log.i(TAG, "Banner ad loaded.");
+                container.setVisibility(View.VISIBLE);
+                MakeAnim(container.getContext(), container, AnimType.IN);
+                super.onAdLoaded();
+            }
+        });
 
         container.post(() -> {
             int width = container.getWidth();
@@ -502,6 +546,7 @@ public class AdsManager {
                     .forNativeAd(nativeAd -> {
                         NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
                         templateView.setVisibility(View.VISIBLE);
+                        MakeAnim(container.getContext(), templateView, AnimType.IN);
                         templateView.setStyles(style);
                         templateView.setNativeAd(nativeAd);
 
@@ -514,6 +559,7 @@ public class AdsManager {
                             @Override
                             public void onViewDetachedFromWindow(@NonNull View view) {
                                 nativeAd.destroy();
+                                Log.d(TAG, "Native ad view detached. Native destroyed.");
                             }
                         });
                     })
@@ -521,13 +567,13 @@ public class AdsManager {
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                             templateView.setVisibility(View.GONE);
-                            Log.w("AdsManager", "Native ad small failed to load: " + loadAdError.getMessage());
+                            Log.e(TAG, "Native ad small failed to load: " + loadAdError.getMessage());
                         }
                     })
                     .build();
             loader.loadAd(new AdRequest.Builder().build());
         } catch (Exception e) {
-            Log.e("AdsManager", "Error showing native ads: " + e.getMessage());
+            Log.e(TAG, "Error showing native ads: " + e.getMessage());
         }
     }
 
@@ -546,6 +592,7 @@ public class AdsManager {
                     .forNativeAd(nativeAd -> {
                         NativeTemplateStyle style = new NativeTemplateStyle.Builder().build();
                         templateView.setVisibility(View.VISIBLE);
+                        MakeAnim(container.getContext(), templateView, AnimType.IN);
                         templateView.setStyles(style);
                         templateView.setNativeAd(nativeAd);
 
@@ -565,13 +612,32 @@ public class AdsManager {
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                             templateView.setVisibility(View.GONE);
-                            Log.w("AdsManager", "Native ad Medium failed to load: " + loadAdError.getMessage());
+                            Log.e(TAG, "Native ad Medium failed to load: " + loadAdError.getMessage());
                         }
                     })
                     .build();
             loader.loadAd(new AdRequest.Builder().build());
         } catch (Exception e) {
-            Log.e("AdsManager", "Error showing native ads: " + e.getMessage());
+            Log.e(TAG, "Error showing native ads: " + e.getMessage());
         }
+    }
+
+    private void MakeAnim(@NonNull Context context, @NonNull View view, @NonNull AnimType type) {
+        Animation anim;
+        if (type == AnimType.IN) {
+            anim = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+        } else if (type == AnimType.OUT) {
+            anim = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+        } else {
+            Log.e(TAG, "Animation type is incorrect.");
+            return;
+        }
+
+        anim.setDuration(1000);
+        view.setAnimation(anim);
+    }
+
+    private enum AnimType {
+        IN, OUT;
     }
 }

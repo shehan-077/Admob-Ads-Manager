@@ -22,16 +22,16 @@ public class App extends Application {
         AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
                 new AdMobIds(
                         getString(R.string.admob_app_id),
-                        Arrays.asList(getString(R.string.admob_interstitial_1), getString(R.string.admob_interstitial_2)),
+                        Arrays.asList(getString(R.string.admob_interstitial), getString(R.string.admob_interstitial)),
                         Arrays.asList(getString(R.string.admob_banner), getString(R.string.admob_banner)),
-                        Arrays.asList(getString(R.string.admob_app_open_test), getString(R.string.admob_app_open_test)),
+                        Arrays.asList(getString(R.string.admob_app_open), getString(R.string.admob_app_open)),
                         Arrays.asList(getString(R.string.admob_reward), getString(R.string.admob_reward)),
-                        Arrays.asList(getString(R.string.admob_native_1), getString(R.string.admob_native_2)),
-                        List.of("")
+                        Arrays.asList(getString(R.string.admob_native), getString(R.string.admob_native)),
+                        List.of(getString(R.string.admob_reward_int))
                 )
         );
 
-        AdsManager.init(this, initializer, AdsStatus.HYBRID);
+        AdsManager.init(this, initializer, AdsStatus.ENABLED);
         AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.white));
 
         AdsManager.getInstance().preLoad(AdsUnit.INTERSTITIAL, 0);
