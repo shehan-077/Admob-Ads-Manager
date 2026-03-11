@@ -228,13 +228,6 @@ AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.pr
 * Optional – if not defined, the default color (white) will be used.
 
 ---
-## 🧩 Complete Example – Application Class
-
-
-
-* `this`: your `Context`
-
----
 
 ## ▶️ Show Ads
 
