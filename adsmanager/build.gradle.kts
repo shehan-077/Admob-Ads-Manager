@@ -38,6 +38,8 @@ dependencies {
     implementation(libs.play.services.ads)
     implementation(libs.error.prone.annotations)
     implementation(libs.lottie)
+
+    implementation(libs.user.messaging.platform)
 }
 
 afterEvaluate {
@@ -46,7 +48,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.github.shehan-077"
                 artifactId = "Admob-Ads-Manager"
-                version = "3.1.2"
+                version = "4.0.0"
 
                 artifact(tasks.named("bundleReleaseAar").get())
             }

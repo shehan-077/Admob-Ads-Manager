@@ -8,9 +8,13 @@ Easily integrate Google AdMob into your Android application with just a few line
 
 * Pre-load ads for a seamless user experience.
 * Retry automatically when ads fail to load.
-* Built-in Lottie loading screen with customizable color - shown automatically during the ad load.
-* No need to manually provide AdMob test ad units — just set `AdsStatus.TESTING` to use predefined test ads.
-* Automatically shows **test ads in debug builds** and **real ads in release builds** with `AdsStatus.HYBRID`
+* Built-in **Lottie loading screen** during ad loading.
+* Customizable loading color.
+* Automatic **test ads in debug builds.**
+* Automatic **real ads in release builds.**
+* Built-in **GDPR Consent (UMP SDK)** support.
+* Privacy options form support.
+* Singleton-based global initialization.
 
 ---
 
@@ -45,8 +49,8 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:3.1.2'
-implementation 'com.google.android.gms:play-services-ads:24.9.0'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:4.0.0'
+implementation 'com.google.android.gms:play-services-ads:25.0.0'
 implementation 'com.airbnb.android:lottie:6.7.1'
 ```
 
@@ -93,6 +97,9 @@ public class App extends Application {
                         Arrays.asList("REWARD_INTERSTITIAL_AD_1", "REWARD_INTERSTITIAL_AD_2")
                 )
         );
+
+        AdsManager.init(this, initializer, AdsStatus.ENABLED);
+        AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
     }
 }
 ```
@@ -117,21 +124,78 @@ public class App extends Application {
                         List.of("REWARD_INTERSTITIAL_AD_ID")
                 )
         );
+
+        AdsManager.init(this, initializer, AdsStatus.ENABLED);
+        AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
     }
 }
 ```
 
 ---
 
-## 🧠 Create AdsManager
+## 🔐 GDPR Consent Flow (NEW in 4.0.0)
+
+Before loading ads, you must request user consent.
+
+Call this in your Launcher Activity (SplashActivity / MainActivity).
 
 ```java
-AdsManager.init(this, initializer, AdsStatus.HYBRID);
+AdsManager.getInstance().startConsentFlow(
+        SplashScreen.this,
+        true,
+        null,
+        new ConsentRequestHandler() {
+            @Override
+            public void onConsentReady(boolean canRequestAds) {
+
+                if (canRequestAds) {
+
+                    AdsManager.getInstance().preLoad(AdsUnit.INTERSTITIAL,0);
+                    AdsManager.getInstance().preLoad(AdsUnit.REWARD,0);
+                    AdsManager.getInstance().preLoad(AdsUnit.APP_OPEN,0);
+                    AdsManager.getInstance().preLoad(AdsUnit.REWARD_INT,0);
+
+                }
+
+            }
+
+            @Override
+            public void onConsentError(String error) {
+
+            }
+        }
+);
 ```
 
-* `this`: your `Application`
-* `initializer`: AdMob config instance
-* `AdsStatus.HYBRID`: enabled test ads when debugging and switch to real ads when released. (`AdsStatus.DISABLED` to disable and `AdsStatus.TESTING` to use test ads.)
+* `SplashScreen.this` – Your Activity context.
+* `true` – Enable test mode (use `false` in production).
+* `null` – Optional test device hashed ID for AdMob testing.
+
+Ads will only load after user consent is ready.
+
+---
+
+## 🔐 Privacy Options Form
+
+If required, you can allow users to update their consent.
+
+```java
+if (AdsManager.getInstance().isPrivacyOptionRequired()) {
+
+    AdsManager.getInstance().showPrivacyOptionForm(this, new ConsentRequestHandler() {
+        @Override
+        public void onConsentReady(boolean canRequestAds) {
+    
+        }
+    
+        @Override
+        public void onConsentError(String error) {
+    
+        }
+    });
+
+}
+```
 
 ---
 
@@ -153,7 +217,7 @@ AdsManager.getInstance().preLoad(AdsUnit.REWARD_INT, 0);
 
 ---
 
-## Built-in Lottie Loading Screen (V 3.0.0)
+## Built-in Lottie Loading Screen (V 3.0.0 above)
 
 ```java
 AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
@@ -166,32 +230,7 @@ AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.pr
 ---
 ## 🧩 Complete Example – Application Class
 
-```java
-public class App extends Application {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        AdsManagerInitializer initializer = AdsManagerInitializer.getInstance(
-                new AdMobIds(
-                        "ADMOB_APP_ID",
-                        Arrays.asList("INTERSTITIAL_AD_1", "INTERSTITIAL_AD_2"),
-                        Arrays.asList("BANNER_AD_1", "BANNER_AD_2"),
-                        Arrays.asList("APP_OPEN_AD_1", "APP_OPEN_AD_2"),
-                        Arrays.asList("REWARD_AD_1", "REWARD_AD_2"),
-                        Arrays.asList("NATIVE_AD_1", "NATIVE_AD_2"),
-                        Arrays.asList("REWARD_INTERSTITIAL_AD_1", "REWARD_INTERSTITIAL_AD_2")
-                )
-        );
-
-        AdsManager.init(this, initializer, AdsStatus.ENABLED);
-        AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
-
-        AdsManager.getInstance().preLoad(AdsUnit.INTERSTITIAL, 0);
-    }
-}
-```
 
 * `this`: your `Context`
 
@@ -330,33 +369,32 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 ## 🧾 Explanation
 
-* **`AdsManagerInitializer`**: Holds your app and ad unit IDs
-* **`AdsManager`**: Core class to preload, show, and manage ads
-* **`AdsStatus`**: Control whether ads are live, disabled, testing, or in hybrid mode
-* **`NativeAdsSize`**: Enum for choosing native ad template size (SMALL or MEDIUM)
-* **`LoadingOverlay`**: Built-in loading animation (Lottie-based) shown automatically during ad loading
+* **`AdsManagerInitializer`**: Stores all AdMob Ad Unit IDs.
+* **`AdsManager`**: Core class to preloading, ad loading, showing ads, GDPR consent, and privacy options.
+* **`AdsStatus`**: Control whether ads are live, disabled, testing, or in hybrid mode.
+* **`NativeAdsSize`**: Enum for choosing native ad template size (SMALL or MEDIUM).
+* **`LoadingOverlay`**: Built-in loading animation (Lottie-based) shown automatically during ad loading.
 
 ---
 
 ## 💡 Usage Tips
 
-* Always preload ads to reduce display delay (Interstitial, Reward, and Reward Interstitial Ads only).
-* Handle all ad events for reliability.
-* Use index-based loading for region-based or fallback logic.
-* Follow AdMob policy strictly to avoid account issues.
-* Use `AdsStatus.HYBRID` during development - Ads manager shows testing ads and after production, ads will automatically switch to real ad units defined by you.
+* Always preload ads to reduce delay.
+* Call consent flow before requesting ads.
+* Handle all ad callbacks.
+* Use multiple ad unit IDs for fallback logic.
+* Follow AdMob policy strictly.
 
 ---
 
-## 🆕 What's New in 3.0.0 (Above)
+## 🆕 What's New in 4.0.0
 
-* ✅ **Built-in Lottie Loading Screen** – shown automatically during ad load
-* 🎨 **Customizable Loading Color** – adapt to your app theme
-* ⚙️ **`AdsStatus.TESTING` Mode** – automatically uses predefined AdMob test units
-* ⚙️ **`AdsStatus.HYBRID` Mode** – automatically uses predefined AdMob test units during development period and after release automatically switches to real ad units defined by you.
-* 🧠 **Singleton Initialization** – initialize once globally, use anywhere
-* 🧩 **Unified Native Ads API** – select size via NativeAdsSize.SMALL or NativeAdsSize.MEDIUM
-* 💡 **Cleaner API** – consistent with Kotlin and Java apps
+* ✅ **Built-in GDPR Consent (UMP SDK)**
+* 🔐 **Privacy Options Form Support**
+* ⚡  **Ads load only after user consent**
+* 🎨️ **Improved Lottie Loading Screen**
+* ⚙️ **Better initialization flow**
+* 🧠 **Improved preload management**
 
 ---
 

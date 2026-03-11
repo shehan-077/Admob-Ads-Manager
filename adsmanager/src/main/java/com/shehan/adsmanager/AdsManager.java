@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
@@ -36,6 +34,7 @@ import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 import com.shehan.adsmanager.ads.NativeTemplateStyle;
 import com.shehan.adsmanager.ads.TemplateView;
+import com.shehan.adsmanager.callback.ConsentRequestHandler;
 import com.shehan.adsmanager.callback.RewardRequestHandler;
 import com.shehan.adsmanager.classes.AdUnitResolver;
 import com.shehan.adsmanager.classes.AdsManagerInitializer;
@@ -45,6 +44,7 @@ import com.shehan.adsmanager.callback.RequestHandler;
 import com.shehan.adsmanager.enums.AdsStatus;
 import com.shehan.adsmanager.enums.NativeAdsSize;
 import com.shehan.adsmanager.loadingview.LoadingOverlay;
+import com.shehan.adsmanager.manager.ConsentManager;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,6 +62,7 @@ public class AdsManager {
     @Nullable
     private Integer loaderTintColor = null;
     private final boolean debugBuild;
+    private final AtomicBoolean startupPreloadDone = new AtomicBoolean(false);
     private final String TAG = "ADS MANAGER";
 
     private AdsManager(@NonNull Application app) {
@@ -70,9 +71,11 @@ public class AdsManager {
         this.debugBuild = isDebugBuild(app);
     }
 
-    public static AdsManager init(@NonNull Context context,
+    public static AdsManager init(
+            @NonNull Context context,
             @NonNull AdsManagerInitializer initializer,
-            @NonNull AdsStatus status) {
+            @NonNull AdsStatus status
+    ) {
         if (adsManager == null) {
             synchronized (AdsManager.class) {
                 if (adsManager == null) {
@@ -85,11 +88,54 @@ public class AdsManager {
         adsManager.adsStatus = Objects.requireNonNull(status, "Status cannot be null.");
         adsManager.rebuildResolver();
 
-        if (mobileAdsInitialized.compareAndSet(false, true)) {
-            MobileAds.initialize(adsManager.application);
-        }
         Log.d("ADS MANAGER", "Ads manager initialized complete.");
         return adsManager;
+    }
+
+    public void startConsentFlow (
+            @NonNull Activity activity,
+            boolean isTestMode,
+            @Nullable String testDeviceId,
+            @NonNull ConsentRequestHandler handler
+    ) {
+        ConsentManager.requestConsent(activity, isTestMode, testDeviceId, new ConsentRequestHandler() {
+            @Override
+            public void onConsentReady(boolean canRequestAds) {
+                if (canRequestAds) {
+                    initMobileAdsIfNeeded();
+                }
+                handler.onConsentReady(canRequestAds);
+            }
+
+            @Override
+            public void onConsentError(String error) {
+                boolean canRequest = ConsentManager.canRequestAds();
+                if (canRequest) {
+                    initMobileAdsIfNeeded();
+                }
+                handler.onConsentReady(canRequest);
+            }
+        });
+    }
+
+    private void initMobileAdsIfNeeded() {
+        if (mobileAdsInitialized.compareAndSet(false, true)) {
+            MobileAds.initialize(application, initializationStatus -> {
+                Log.d(TAG, "AdMob Ads Initialized.");
+            });
+        }
+    }
+
+    public boolean canRequestAds() {
+        return ConsentManager.canRequestAds() && mobileAdsInitialized.get();
+    }
+
+    public void showPrivacyOptionForm(@NonNull Activity activity, @NonNull ConsentRequestHandler handler) {
+        ConsentManager.showPrivacyOptionForm(activity, handler);
+    }
+
+    public boolean isPrivacyOptionRequired() {
+        return  ConsentManager.isPrivacyOptionRequired();
     }
 
     public static AdsManager getInstance() {
@@ -120,8 +166,8 @@ public class AdsManager {
     }
 
     public void preLoad(AdsUnit adsUnit, int index) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled())
-            return;
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds()) return;
+
         switch (adsUnit) {
             case INTERSTITIAL:
                 preLoad.Load_Int_Ads(index);
@@ -159,7 +205,7 @@ public class AdsManager {
     }
 
     public void showInterstitialAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds()) {
             handler.onSuccess();
             return;
         }
@@ -225,7 +271,7 @@ public class AdsManager {
     }
 
     public void showRewardAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds()) {
             handler.onShowed();
             handler.onDismissed();
             return;
@@ -315,7 +361,7 @@ public class AdsManager {
     }
 
     public void showRewardIntAds(@NonNull Activity activity, int index, @NonNull RewardRequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds()) {
             handler.onShowed();
             handler.onDismissed();
             return;
@@ -405,7 +451,7 @@ public class AdsManager {
     }
 
     public void showAppOpenAds(@NonNull Activity activity, int index, @NonNull RequestHandler handler) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled()) {
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds()) {
             handler.onSuccess();
             return;
         }
@@ -471,7 +517,7 @@ public class AdsManager {
     }
 
     public void showBannerAds(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled())
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds())
             return;
 
         if (container.getChildCount() > 0) {
@@ -521,7 +567,7 @@ public class AdsManager {
     }
 
     public void showNativeAds(int index, @NonNull LinearLayout container, @NonNull NativeAdsSize size) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled())
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds())
             return;
 
         if (size == NativeAdsSize.SMALL) {
@@ -532,7 +578,7 @@ public class AdsManager {
     }
 
     private void showNativeAdsSmall(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled())
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds())
             return;
 
         try {
@@ -578,7 +624,7 @@ public class AdsManager {
     }
 
     private void showNativeAdsMedium(int index, @NonNull LinearLayout container) {
-        if (adUnitResolver == null || adUnitResolver.isDisabled())
+        if (adUnitResolver == null || adUnitResolver.isDisabled() || !canRequestAds())
             return;
 
         try {

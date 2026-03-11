@@ -11,8 +11,10 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 import com.shehan.adsmanager.AdsManager;
+import com.shehan.adsmanager.callback.ConsentRequestHandler;
 import com.shehan.adsmanager.callback.RequestHandler;
 import com.shehan.adsmanager.callback.RewardRequestHandler;
+import com.shehan.adsmanager.classes.AdsUnit;
 import com.shehan.adsmanager.enums.NativeAdsSize;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +38,25 @@ public class MainActivity extends AppCompatActivity {
         btnNative = findViewById(R.id.main_btnNative);
         btnNativeMedium = findViewById(R.id.main_btnNativeMedium);
         btnNext = findViewById(R.id.main_btnNext);
+
+        AdsManager.getInstance().startConsentFlow(
+                this,
+                true,
+                null,
+                new ConsentRequestHandler() {
+                    @Override
+                    public void onConsentReady(boolean canRequestAds) {
+                        if (canRequestAds) {
+                            AdsManager.getInstance().preLoad(AdsUnit.INTERSTITIAL, 0);
+                        }
+                    }
+
+                    @Override
+                    public void onConsentError(String error) {
+
+                    }
+                }
+        );
 
         btnAppOpen.setOnClickListener(v-> {
             AdsManager.getInstance().showAppOpenAds(this, 0, new RequestHandler() {
