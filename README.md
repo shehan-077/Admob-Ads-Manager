@@ -7,7 +7,6 @@ Easily integrate Google AdMob into your Android application with just a few line
 ## 🚀 Key Features
 
 * Pre-load ads for a seamless user experience.
-* Retry automatically when ads fail to load.
 * Built-in **Lottie loading screen** during ad loading.
 * Customizable loading color.
 * Automatic **test ads in debug builds.**
@@ -49,7 +48,7 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:4.0.0'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:4.0.1'
 implementation 'com.google.android.gms:play-services-ads:25.0.0'
 implementation 'com.airbnb.android:lottie:6.7.1'
 ```
@@ -380,7 +379,7 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 ---
 
-## 🆕 What's New in 4.0.0
+## 🆕 What's New in 4.0.0 (Above)
 
 * ✅ **Built-in GDPR Consent (UMP SDK)**
 * 🔐 **Privacy Options Form Support**
