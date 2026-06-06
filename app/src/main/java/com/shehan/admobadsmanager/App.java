@@ -33,5 +33,6 @@ public class App extends Application {
 
         AdsManager.init(this, initializer, AdsStatus.ENABLED);
         AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.white));
+        AdsManager.getInstance().setDimAmount(0.65f);
     }
 }

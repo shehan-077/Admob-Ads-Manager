@@ -2,6 +2,7 @@ package com.shehan.admobadsmanager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Window;
 import android.widget.Toast;
 

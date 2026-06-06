@@ -26,7 +26,7 @@ public final class LoadingOverlay {
     private Dialog dialog;
     private LottieAnimationView lottie;
 
-    public void show(@NonNull Activity activity, @Nullable Integer tintColor) {
+    public void show(@NonNull Activity activity, @Nullable Integer tintColor, @Nullable Float dimAmount) {
         if (activity.isFinishing())
             return;
         if (dialog != null && dialog.isShowing())
@@ -39,7 +39,7 @@ public final class LoadingOverlay {
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            if (dimAmount != null) dialog.getWindow().setDimAmount(dimAmount);
         }
 
         lottie = dialog.findViewById(R.id.adsManager_lottieView);

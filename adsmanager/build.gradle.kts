@@ -15,7 +15,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -48,7 +48,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.github.shehan-077"
                 artifactId = "Admob-Ads-Manager"
-                version = "4.0.1"
+                version = "4.1.0"
 
                 artifact(tasks.named("bundleReleaseAar").get())
             }

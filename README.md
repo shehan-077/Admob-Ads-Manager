@@ -1,4 +1,4 @@
-# Custom AdMob Ads Manager Library
+# Custom AdMob Ads Manager Library (Java)
 
 Easily integrate Google AdMob into your Android application with just a few lines of code.
 
@@ -48,8 +48,8 @@ dependencyResolutionManagement {
 ### Step 2: Add Dependencies
 
 ```gradle
-implementation 'com.github.shehan-077:Admob-Ads-Manager:4.0.1'
-implementation 'com.google.android.gms:play-services-ads:25.0.0'
+implementation 'com.github.shehan-077:Admob-Ads-Manager:4.1.0'
+implementation 'com.google.android.gms:play-services-ads:25.3.0'
 implementation 'com.airbnb.android:lottie:6.7.1'
 ```
 
@@ -99,6 +99,7 @@ public class App extends Application {
 
         AdsManager.init(this, initializer, AdsStatus.ENABLED);
         AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
+        AdsManager.getInstance().setDimAmount(0.65f); // (Optional)
     }
 }
 ```
@@ -126,10 +127,10 @@ public class App extends Application {
 
         AdsManager.init(this, initializer, AdsStatus.ENABLED);
         AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.primary));
+        AdsManager.getInstance().setDimAmount(0.65f); // (Optional)
     }
 }
 ```
-
 ---
 
 ## 🔐 GDPR Consent Flow (NEW in 4.0.0)
@@ -226,6 +227,23 @@ AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.pr
 * `R.color.primary`: Customize the color you want to show
 * Optional – if not defined, the default color (white) will be used.
 
+### Dialog Background Dimming (V 4.1.0 above)
+
+Control the darkness of the background behind loading dialogs and ad-related popups.
+
+```java
+AdsManager.getInstance().setDimAmount(0.65f);
+```
+
+* `0.0f` = No dimming
+* `0.3f` = Light dimming
+* `0.5f` = Medium dimming
+* `0.65f` = Recommended dark overlay
+* `1.0f` = Fully dark background
+
+This helps focus user attention on the dialog while reducing distractions from the underlying UI.
+Default: `0.0f`
+
 ---
 
 ## ▶️ Show Ads
@@ -233,7 +251,7 @@ AdsManager.getInstance().setLoadingColor(ContextCompat.getColor(this, R.color.pr
 ### App Open Ad
 
 ```java
-AdsManager.getInstance().showAppOpenAds(this, 0, new RequestHandler() {
+AdsManager.getInstance().showAppOpenAds(Activity, index, new RequestHandler() {
     @Override
     public void onSuccess() {
         // App Open Ad Showed.
@@ -245,13 +263,13 @@ AdsManager.getInstance().showAppOpenAds(this, 0, new RequestHandler() {
     }
 });
 ```
-* `this`: your `Context`
-* `0`: Index number of AdMob ad unit.
+* `Activity`: your `Activity`
+* `index`: Index number of AdMob ad unit.
 
 ### Interstitial Ad
 
 ```java
-AdsManager.getInstance().showInterstitialAds(this, 0, new RequestHandler() {
+AdsManager.getInstance().showInterstitialAds(Activity, index, new RequestHandler() {
     @Override
     public void onSuccess() {
         // Interstitial Ad Showed.
@@ -264,13 +282,13 @@ AdsManager.getInstance().showInterstitialAds(this, 0, new RequestHandler() {
 });
 ```
 
-* `this`: your `Context`
-* `0`: Index number of AdMob ad unit.
+* `Activity`: your `Activity`
+* `index`: Index number of AdMob ad unit.
 
 ### Rewarded Ad
 
 ```java
-AdsManager.getInstance().showRewardAds(this, 0, new RewardRequestHandler() {
+AdsManager.getInstance().showRewardAds(Activity, index, new RewardRequestHandler() {
     @Override
     public void onShowed() {
         Toast.makeText(MainActivity.this, "Reward Ads Showed.", Toast.LENGTH_SHORT).show();
@@ -298,13 +316,13 @@ AdsManager.getInstance().showRewardAds(this, 0, new RewardRequestHandler() {
 });
 ```
 
-* `this`: your `Context`
-* `0`: Index number of AdMob ad unit.
+* `Activity`: your `Activity`
+* `index`: Index number of AdMob ad unit.
 
 ### Rewarded Interstitial Ad
 
 ```java
-AdsManager.getInstance().showRewardIntAds(this, 0, new RewardRequestHandler() {
+AdsManager.getInstance().showRewardIntAds(Activity, index, new RewardRequestHandler() {
     @Override
     public void onShowed() {
         Toast.makeText(MainActivity.this, "Rewarded Int Ads Showed.", Toast.LENGTH_SHORT).show();
@@ -331,28 +349,28 @@ AdsManager.getInstance().showRewardIntAds(this, 0, new RewardRequestHandler() {
     }
 });
 ```
-* `this`: your `Context`
-* `0`: Index number of AdMob ad unit.
+* `Activity`: your `Activity`
+* `index`: Index number of AdMob ad unit.
 
 ### Banner Ad
 
 ```java
-AdsManager.getInstance().showBannerAds(0, findViewById(R.id.main_bannerContainer));
+AdsManager.getInstance().showBannerAds(index, findViewById(R.id.main_bannerContainer));
 ```
 
 ### Native Ad (Small)
 
 ```java
-AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeContainer), NativeAdsSize.SMALL);
+AdsManager.getInstance().showNativeAds(index, findViewById(R.id.main_nativeContainer), NativeAdsSize.SMALL);
 ```
 
 ### Native Ad (Medium)
 
 ```java
-AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumContainer), NativeAdsSize.MEDIUM);
+AdsManager.getInstance().showNativeAds(index, findViewById(R.id.main_nativeMediumContainer), NativeAdsSize.MEDIUM);
 ```
 
-* `0`: Index number of AdMob ad unit.
+* `index`: Index number of AdMob ad unit.
 * `findViewById(R.id.main_bannerContainer)`: Banner container view
 * `findViewById(R.id.main_nativeContainer)`: Native small ad container view
 * `findViewById(R.id.main_nativeMediumContainer)`: Native medium ad container view
@@ -372,9 +390,9 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 ## 💡 Usage Tips
 
 * Always preload ads to reduce delay.
-* Call consent flow before requesting ads.
+* Call consent flow before requesting ads. (Mandatory)
 * Handle all ad callbacks.
-* Use multiple ad unit IDs for fallback logic.
+* Use multiple ad unit IDs for fallback logic. (Optional)
 * Follow AdMob policy strictly.
 
 ---
@@ -383,7 +401,7 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 
 * ✅ **Built-in GDPR Consent (UMP SDK)**
 * 🔐 **Privacy Options Form Support**
-* ⚡  **Ads load only after user consent**
+* ⚡ **Ads load only after user consent**
 * 🎨️ **Improved Lottie Loading Screen**
 * ⚙️ **Better initialization flow**
 * 🧠 **Improved preload management**
@@ -394,3 +412,17 @@ AdsManager.getInstance().showNativeAds(0, findViewById(R.id.main_nativeMediumCon
 ## 🎉 Enjoy!
 
 Feel free to use this library to simplify and streamline AdMob integration.
+
+---
+## License & Disclaimer
+
+No license is required to use this library. Anyone is free to use, modify, and 
+include this code in personal, commercial, or open-source projects.
+
+This library is provided "as is", without any warranty of any kind. The author 
+shall not be held responsible for any issues, damages, losses, policy violations, 
+account actions, or other consequences resulting from the use of this library. 
+Users are responsible for ensuring that their implementation complies with all 
+applicable platform policies, regulations, and requirements.
+
+`Shehan Sachintha ✍️`

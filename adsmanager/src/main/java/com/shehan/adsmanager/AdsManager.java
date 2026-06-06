@@ -61,6 +61,7 @@ public class AdsManager {
     private final LoadingOverlay loading = new LoadingOverlay();
     @Nullable
     private Integer loaderTintColor = null;
+    private float dimAmount;
     private final boolean debugBuild;
     private final AtomicBoolean startupPreloadDone = new AtomicBoolean(false);
     private final String TAG = "ADS MANAGER";
@@ -196,6 +197,10 @@ public class AdsManager {
         this.loaderTintColor = color;
     }
 
+    public void setDimAmount(float dimAmount) {
+        this.dimAmount = dimAmount;
+    }
+
     public void destroyAds() {
         preLoad.destroyAds();
     }
@@ -210,7 +215,7 @@ public class AdsManager {
             return;
         }
 
-        loading.show(activity, loaderTintColor);
+        loading.show(activity, loaderTintColor, dimAmount);
 
         if (preLoad.mInterstitial != null) {
             InterstitialAd ad = preLoad.mInterstitial;
@@ -277,7 +282,7 @@ public class AdsManager {
             return;
         }
 
-        loading.show(activity, loaderTintColor);
+        loading.show(activity, loaderTintColor, dimAmount);
 
         if (preLoad.mReward != null) {
             RewardedAd ad = preLoad.mReward;
@@ -367,7 +372,7 @@ public class AdsManager {
             return;
         }
 
-        loading.show(activity, loaderTintColor);
+        loading.show(activity, loaderTintColor, dimAmount);
 
         if (preLoad.mRewardInt != null) {
             RewardedInterstitialAd ad = preLoad.mRewardInt;
@@ -456,7 +461,7 @@ public class AdsManager {
             return;
         }
 
-        loading.show(activity, loaderTintColor);
+        loading.show(activity, loaderTintColor, dimAmount);
 
         if (preLoad.mAppOpen != null) {
             AppOpenAd ad = preLoad.mAppOpen;
